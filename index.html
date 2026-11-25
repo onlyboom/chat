@@ -852,7 +852,7 @@
       <label>
         <span id="lblPin">🔒 Secret Room Code (Room PIN)</span>
       </label>
-      <input type="text" id="inputPin" class="input-box" placeholder="Enter your shared secret code (e.g. huy2026)" value="huy2026" />
+      <input type="text" id="inputPin" class="input-box" placeholder="Enter your shared secret code (e.g. agrafkens)" value="agrafkens" />
     </div>
 
     <div class="security-note" id="uiSecurityNote">
@@ -963,7 +963,7 @@
         namePlaceholder: 'E.g. Emma',
         defaultName: 'Emma 🐱',
         lblPin: '🔒 Secret Room Code (Room PIN)',
-        pinPlaceholder: 'Enter your shared secret code (e.g. huy2026)',
+        pinPlaceholder: 'Enter your shared secret code (e.g. agrafkens)',
         securityHtml: '<strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).',
         btnJoin: 'Start Private Chat 🐾 →',
         roomTitle: '🐱 Private Translation Chat',
@@ -996,7 +996,7 @@
         namePlaceholder: 'Ví dụ: Huy',
         defaultName: 'Huy 🐱',
         lblPin: '🔒 Mã khóa phòng bí mật (Room PIN)',
-        pinPlaceholder: 'Nhập mã bí mật chung của 2 người (VD: huy2026)',
+        pinPlaceholder: 'Nhập mã bí mật chung của 2 người (VD: agrafkens)',
         securityHtml: '<strong>Bảo mật P2P 100%:</strong> Tin nhắn & hình ảnh truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người.',
         btnJoin: 'Vào Phòng Chat 🐾 →',
         roomTitle: '🐱 Phòng Chat Mèo Con',
@@ -1025,7 +1025,7 @@
 
     let myRole = 'en';
     let myName = '';
-    let roomPin = 'huy2026';
+    let roomPin = 'agrafkens';
     let peer = null;
     // Keep track of ALL active connections (both incoming & outgoing, plus legacy IDs) so messages ALWAYS go through both ways!
     let connections = [];
@@ -1100,8 +1100,11 @@
 
       if (urlPin) {
         document.getElementById('inputPin').value = urlPin;
-      } else if (savedPin) {
+      } else if (savedPin && savedPin !== 'huy2026') {
         document.getElementById('inputPin').value = savedPin;
+      } else {
+        document.getElementById('inputPin').value = 'agrafkens';
+        localStorage.setItem('cat_chat_pin', 'agrafkens');
       }
 
       if (urlRole === 'vn' || savedRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
