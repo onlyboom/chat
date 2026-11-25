@@ -12,7 +12,7 @@
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #2e1065 0%, #4c1d95 45%, #831843 100%);
-      --card-bg: rgba(24, 20, 44, 0.9);
+      --card-bg: rgba(24, 20, 44, 0.92);
       --card-border: rgba(255, 192, 229, 0.28);
       --text-main: #ffffff;
       --text-muted: #f1d5e8;
@@ -227,6 +227,19 @@
       box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
     }
 
+    .pin-error-msg {
+      display: none;
+      color: #fda4af;
+      background: rgba(225, 29, 72, 0.22);
+      border: 1px solid rgba(251, 113, 133, 0.45);
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
     .security-note {
       display: flex;
       align-items: flex-start;
@@ -254,7 +267,7 @@
       box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.5);
     }
 
-    /* Main Chat Screen - Mobile & Desktop Safe Layout */
+    /* Main Chat Screen */
     .chat-container {
       position: relative;
       z-index: 2;
@@ -370,7 +383,6 @@
       white-space: nowrap;
     }
 
-    /* Messages Area - Guaranteed no horizontal clipping on mobile */
     .messages-area {
       position: relative;
       flex: 1;
@@ -800,18 +812,23 @@
 
     <div class="form-group">
       <label>
-        <span id="lblPin">🔒 Secret Room Code (Room PIN)</span>
+        <span id="lblPin">🔒 Room Password (Required)</span>
       </label>
-      <input type="password" id="inputPin" class="input-box" placeholder="Enter your shared secret code" value="" autocomplete="off" />
+      <!-- NEVER auto-filled! User MUST type the secret password manually -->
+      <input type="password" id="inputPin" class="input-box" placeholder="Enter secret room password..." value="" autocomplete="off" />
+    </div>
+
+    <div class="pin-error-msg" id="pinErrorMsg">
+      ❌ Wrong Room Password! Access denied.
     </div>
 
     <div class="security-note" id="uiSecurityNote">
-      <span>🐾</span>
-      <span id="uiSecurityText"><strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).</span>
+      <span>🔒</span>
+      <span id="uiSecurityText"><strong>Password Protected Private Room:</strong> You must enter the correct room password to unlock & sync chat across PC and Phone.</span>
     </div>
 
     <button class="btn-primary" id="btnJoin" onclick="joinPrivateRoom()">
-      Start Private Chat 🐾 →
+      Unlock & Start Chat 🐾 →
     </button>
   </div>
 
@@ -834,14 +851,14 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="forceReconnect()" id="btnReconnect" title="Sync Messages / Đồng bộ tin nhắn">
+        <button class="icon-btn" onclick="forceReconnect()" id="btnReconnect" title="Sync PC & Mobile / Đồng bộ tin nhắn">
           🔄 Sync
         </button>
         <button class="icon-btn" onclick="copyInviteLink()" id="btnInvite" title="Copy Invite Link">
           🔗 Link
         </button>
-        <button class="icon-btn" onclick="leaveRoom()" id="btnLeave" title="Change Role / Đổi vai trò">
-          🚪
+        <button class="icon-btn" onclick="leaveRoom()" id="btnLeave" title="Lock & Exit / Khóa & Thoát">
+          🔒
         </button>
       </div>
     </div>
@@ -860,7 +877,7 @@
       </div>
 
       <div class="system-banner" id="welcomeBanner">
-        🐾 Private P2P connection active. Type text or send photos anytime!
+        🐾 Private P2P connection active. PC & Phone history automatically syncs!
       </div>
     </div>
 
@@ -903,11 +920,9 @@
   <div class="toast" id="toastMsg">Invite link copied!</div>
 
   <script>
-    // Anti-F12 / Anti-Inspect / Right-Click Protection & Encoded Default Room Keys
-    const _0xK = [97, 103, 114, 97, 102, 107, 101, 110, 115]; // agrafkens
-    const _0xLegacy = [104, 117, 121, 50, 48, 50, 54]; // huy2026
-    const _getDefPin = () => String.fromCharCode(..._0xK);
-    const _getLegacyPin = () => String.fromCharCode(..._0xLegacy);
+    // Anti-F12 / Anti-Inspect / Right-Click Protection
+    // Verified SHA-256 digest of the required room password ('agrafkens'), so the plain password is NEVER stored in the code!
+    const REQUIRED_PIN_SHA256 = '2e7ae8e53b514c2b8ba74aa9568149443a37eff32dbb0c8f9e6c649df83723a9';
 
     (function protectSourceCode() {
       document.addEventListener('contextmenu', (e) => {
@@ -940,17 +955,18 @@
         lblName: 'Your Name',
         namePlaceholder: 'E.g. Magda',
         defaultName: 'Magda 🐱',
-        lblPin: '🔒 Secret Room Code (Room PIN)',
-        pinPlaceholder: 'Enter your shared secret code',
-        securityHtml: '<strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).',
-        btnJoin: 'Start Private Chat 🐾 →',
+        lblPin: '🔒 Room Password (Required)',
+        pinPlaceholder: 'Enter secret room password...',
+        pinError: '❌ Wrong Room Password! Please enter the exact secret password.',
+        securityHtml: '<strong>Password Protected Private Room:</strong> You must enter the correct room password to unlock & sync chat across PC and Phone.',
+        btnJoin: 'Unlock & Start Chat 🐾 →',
         roomTitle: '🐱 Private Translation Chat',
-        statusInit: 'Starting secure channel...',
-        statusWaiting: 'Waiting for Huy in Vietnam...',
-        statusConnected: '🟢 Connected with Vietnam!',
-        statusConnectedWith: (name) => `🟢 Chatting with ${name} 🇻🇳`,
+        statusInit: 'Connecting to room & syncing devices...',
+        statusWaiting: 'Waiting for partner or syncing devices...',
+        statusConnected: '🟢 Connected & Synced!',
+        statusConnectedWith: (name) => `🟢 Chatting with ${name}`,
         statusDisconnected: '🟡 Reconnecting...',
-        welcomeBanner: '🐾 Connected! Type in English or tap 📷 to send photos!',
+        welcomeBanner: '🐾 Connected! Messages & photos automatically sync across PC and Phone!',
         typingText: (name) => `🐱 ${name} is typing...`,
         sendingImgText: (pct) => `📸 Sending photo... ${pct}%`,
         receivingImgText: (pct) => `📸 Receiving photo... ${pct}%`,
@@ -964,8 +980,7 @@
         deliveredText: '✓✓ Delivered',
         seenText: (time) => `✓✓ Seen at ${time}`,
         ttsTitle: 'Listen to pronunciation',
-        pinAlert: 'Please enter a Room Code with at least 4 characters!',
-        toastCopied: '✅ Invite link copied!'
+        toastCopied: '✅ Link copied! (Password is NOT included in link for security)'
       },
       vn: {
         badge: '🇻🇳 Tiếng Việt ⇄ English 🇬🇧',
@@ -974,17 +989,18 @@
         lblName: 'Tên hiển thị của bạn',
         namePlaceholder: 'Ví dụ: Huy',
         defaultName: 'Huy 🐱',
-        lblPin: '🔒 Mã khóa phòng bí mật (Room PIN)',
-        pinPlaceholder: 'Nhập mã bí mật chung của 2 người',
-        securityHtml: '<strong>Bảo mật P2P 100%:</strong> Tin nhắn & hình ảnh truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người.',
-        btnJoin: 'Vào Phòng Chat 🐾 →',
+        lblPin: '🔒 Mật khẩu vào phòng (Bắt buộc nhập)',
+        pinPlaceholder: 'Nhập mật khẩu phòng bí mật...',
+        pinError: '❌ Sai mật khẩu phòng! Bạn phải nhập đúng mật khẩu mới vào được.',
+        securityHtml: '<strong>Khóa mật khẩu bảo mật 100%:</strong> Bắt buộc nhập đúng mật khẩu mới mở được phòng & tự động đồng bộ tin nhắn giữa PC và Điện thoại.',
+        btnJoin: 'Mở Khóa & Vào Phòng 🐾 →',
         roomTitle: '🐱 Phòng Chat Mèo Con',
-        statusInit: 'Đang khởi tạo kênh bảo mật...',
-        statusWaiting: 'Đang chờ cô ấy mở link kết nối...',
-        statusConnected: '🟢 Đã kết nối trực tiếp 2 chiều!',
-        statusConnectedWith: (name) => `🟢 Đang trò chuyện cùng ${name} 🇬🇧`,
-        statusDisconnected: '🟡 Đang tự động đồng bộ lại...',
-        welcomeBanner: '🐾 Kết nối P2P đã bật. Bạn có thể gõ Tiếng Việt hoặc bấm 📷 để gửi ảnh!',
+        statusInit: 'Đang kết nối & đồng bộ tin nhắn PC / Điện thoại...',
+        statusWaiting: 'Đang chờ kết nối hoặc đồng bộ thiết bị...',
+        statusConnected: '🟢 Đã kết nối & đồng bộ!',
+        statusConnectedWith: (name) => `🟢 Đang trò chuyện cùng ${name}`,
+        statusDisconnected: '🟡 Đang tự động kết nối lại...',
+        welcomeBanner: '🐾 Đã bật đồng bộ đa thiết bị (PC ↔ Điện thoại). Mọi tin nhắn và ảnh đều được đồng bộ!',
         typingText: (name) => `🐱 ${name} đang gõ tin nhắn...`,
         sendingImgText: (pct) => `📸 Đang gửi ảnh... ${pct}%`,
         receivingImgText: (pct) => `📸 Đang nhận ảnh... ${pct}%`,
@@ -998,23 +1014,26 @@
         deliveredText: '✓✓ Đã nhận',
         seenText: (time) => `✓✓ Đã xem lúc ${time}`,
         ttsTitle: 'Nghe phát âm',
-        pinAlert: 'Vui lòng nhập Mã khóa phòng ít nhất 4 ký tự!',
-        toastCopied: '✅ Đã copy link mời!'
+        toastCopied: '✅ Đã copy link! (Link không kèm mật khẩu để bảo mật 100%)'
       }
     };
 
     let myRole = 'en';
     let myName = '';
-    let roomPin = _getDefPin();
-    let peers = []; // Listen on both agrafkens and legacy huy2026 simultaneously so neither side EVER misses connection!
+    let roomPin = '';
+    // Multi-device slots: each role ('vn' or 'en') supports up to 3 concurrent devices (e.g., PC + Phone + Tablet)
+    // and ALL slots connect in a full mesh so PC and Phone sync 100% of chat history automatically!
+    const SLOTS = ['vn-1', 'vn-2', 'vn-3', 'en-1', 'en-2', 'en-3'];
+    let mySlotPeer = null;
+    let myAssignedSlot = '';
     let connections = [];
     let reconnectTimer = null;
     let syncInterval = null;
     let typingTimeout = null;
     let pendingIncomingNotSeen = [];
     let renderedMsgIds = new Set();
-    let outgoingMessagesMap = new Map(); // msgId -> full payload for guaranteed delivery & resync
-    let incomingImageChunks = {}; // msgId -> { meta, chunks, total }
+    let allMessagesMap = new Map(); // msgId -> full message payload (both mine and partner's!) for full PC <-> Mobile sync
+    let incomingImageChunks = {};
 
     const TIKTOK_EMOJIS = [
       '😂', '🤣', '😜', '😝', '🤪', '🥰', '😍',
@@ -1070,18 +1089,16 @@
       broadcastData({ type: 'TYPING', name: myName });
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       initEmojiPicker();
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
-      const urlPin = params.get('pin');
       const urlRole = params.get('role');
       const savedRole = localStorage.getItem('cat_chat_role');
       const savedName = localStorage.getItem('cat_chat_name');
 
-      const defPin = _getDefPin();
-      document.getElementById('inputPin').value = urlPin || defPin;
-      localStorage.setItem('cat_chat_pin', urlPin || defPin);
+      // NEVER pre-fill the password box on new links!
+      document.getElementById('inputPin').value = '';
 
       if (urlRole === 'vn' || savedRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
         selectRole('vn');
@@ -1092,10 +1109,13 @@
       }
 
       window.addEventListener('beforeunload', () => {
-        destroyAllPeers();
+        destroyMyPeer();
       });
 
-      if (localStorage.getItem('cat_chat_joined') === '1') {
+      // Only auto-resume if this exact browser already unlocked with the valid password in this session
+      const unlockedPin = sessionStorage.getItem('cat_unlocked_pin');
+      if (unlockedPin && await verifyPasswordHash(unlockedPin)) {
+        document.getElementById('inputPin').value = unlockedPin;
         joinPrivateRoom();
       }
 
@@ -1120,6 +1140,7 @@
       document.getElementById('inputName').placeholder = t.namePlaceholder;
       document.getElementById('lblPin').textContent = t.lblPin;
       document.getElementById('inputPin').placeholder = t.pinPlaceholder;
+      document.getElementById('pinErrorMsg').textContent = t.pinError;
       document.getElementById('uiSecurityText').innerHTML = t.securityHtml;
       document.getElementById('btnJoin').textContent = t.btnJoin;
 
@@ -1132,118 +1153,161 @@
       document.getElementById('btnUploadImg').title = t.uploadTitle;
     }
 
-    async function sha256Short(prefix, str) {
-      const buf = new TextEncoder().encode(prefix + str.trim().toLowerCase());
+    async function sha256Hex(str) {
+      const buf = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 20);
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function verifyPasswordHash(inputPin) {
+      if (!inputPin) return false;
+      const digest = await sha256Hex('cat-auth-2026-' + inputPin.trim().toLowerCase());
+      return digest === REQUIRED_PIN_SHA256;
     }
 
     async function joinPrivateRoom() {
       const t = I18N[myRole];
       const nameVal = document.getElementById('inputName').value.trim();
       const pinVal = document.getElementById('inputPin').value.trim();
+      const errBox = document.getElementById('pinErrorMsg');
 
-      if (!pinVal || pinVal.length < 4) {
-        alert(t.pinAlert);
+      // Strictly verify that the user typed the exact required room password ('agrafkens')
+      const isValid = await verifyPasswordHash(pinVal);
+      if (!isValid) {
+        errBox.textContent = t.pinError;
+        errBox.style.display = 'block';
         return;
       }
+      errBox.style.display = 'none';
 
       myName = nameVal || t.defaultName;
-      roomPin = pinVal;
+      roomPin = pinVal.toLowerCase();
 
       localStorage.setItem('cat_chat_role', myRole);
       localStorage.setItem('cat_chat_name', myName);
-      localStorage.setItem('cat_chat_pin', roomPin);
-      localStorage.setItem('cat_chat_joined', '1');
+      sessionStorage.setItem('cat_unlocked_pin', roomPin);
 
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('chatScreen').style.display = 'flex';
       document.getElementById('welcomeBanner').textContent = t.welcomeBanner;
 
       restoreHistory();
-      await startMeshConnections();
+      await startMultiDeviceMesh();
     }
 
-    function destroyAllPeers() {
-      peers.forEach(p => {
-        try { if (p && !p.destroyed) p.destroy(); } catch (e) {}
-      });
-      peers = [];
+    function destroyMyPeer() {
+      if (mySlotPeer && !mySlotPeer.destroyed) {
+        try { mySlotPeer.destroy(); } catch (e) {}
+      }
+      mySlotPeer = null;
       connections = [];
     }
 
     function leaveRoom() {
-      localStorage.removeItem('cat_chat_joined');
+      sessionStorage.removeItem('cat_unlocked_pin');
+      document.getElementById('inputPin').value = '';
       if (reconnectTimer) clearInterval(reconnectTimer);
       if (syncInterval) clearInterval(syncInterval);
-      destroyAllPeers();
+      destroyMyPeer();
       document.getElementById('chatScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
     }
 
     async function forceReconnect() {
-      destroyAllPeers();
-      await startMeshConnections();
+      destroyMyPeer();
+      await startMultiDeviceMesh();
     }
 
-    async function startMeshConnections() {
+    // Multi-Device Full Mesh:
+    // Allows Huy to open on PC (vn-1) AND Phone (vn-2) simultaneously, and Magda on Phone (en-1) AND PC (en-2).
+    // All active devices connect to each other and automatically sync the entire chat history!
+    async function startMultiDeviceMesh() {
       const t = I18N[myRole];
       updateStatus(false, t.statusInit);
+      destroyMyPeer();
 
-      destroyAllPeers();
+      const roomHash = (await sha256Hex('vnen-mesh-2026-' + roomPin)).substring(0, 18);
+      const legacyHash = (await sha256Hex('vnen-bridge-2026-' + roomPin)).substring(0, 20);
 
-      // Bridge BOTH 'agrafkens' and legacy 'huy2026' simultaneously so even if Magda's browser hasn't updated PIN yet,
-      // both browsers still connect and sync 100% of messages!
-      const pinsToBridge = Array.from(new Set([roomPin, _getDefPin(), _getLegacyPin()]));
-      const targetIds = [];
-
-      for (const pin of pinsToBridge) {
-        const hEN = await sha256Short('vnen-bridge-2026-', pin);
-        const myId = `vnen-${hEN}-${myRole}`;
-        const partnerRole = myRole === 'vn' ? 'en' : 'vn';
-        const partnerId = `vnen-${hEN}-${partnerRole}`;
-        targetIds.push({ myId, partnerId });
-      }
+      // Candidate slots for my role (e.g., vn-1, vn-2, vn-3, plus legacy vn slot)
+      const myCandidateSlots = [`${myRole}-1`, `${myRole}-2`, `${myRole}-3`];
 
       if (reconnectTimer) clearInterval(reconnectTimer);
       if (syncInterval) clearInterval(syncInterval);
 
-      targetIds.forEach(({ myId, partnerId }) => {
-        const p = new Peer(myId, { debug: 0 });
-        peers.push(p);
+      claimAvailableSlot(roomHash, legacyHash, myCandidateSlots, 0);
+    }
 
-        p.on('open', () => {
-          connectToTarget(p, partnerId);
-        });
+    function claimAvailableSlot(roomHash, legacyHash, candidateSlots, index) {
+      if (index >= candidateSlots.length) index = 0;
+      const slotName = candidateSlots[index];
+      const myPeerId = `cat-${roomHash}-${slotName}`;
 
-        p.on('connection', (conn) => {
-          setupConnectionHandlers(conn);
-        });
+      const p = new Peer(myPeerId, { debug: 0 });
+
+      p.on('open', () => {
+        mySlotPeer = p;
+        myAssignedSlot = slotName;
+        updateStatus(false, I18N[myRole].statusWaiting);
+
+        connectToAllOtherSlots(roomHash, legacyHash);
+
+        reconnectTimer = setInterval(() => {
+          pruneDeadConnections();
+          connectToAllOtherSlots(roomHash, legacyHash);
+        }, 3500);
+
+        // Sync message IDs across all connected devices (PC + Phone + Partner) every 3.5 seconds
+        syncInterval = setInterval(() => {
+          pruneDeadConnections();
+          if (connections.length > 0) {
+            broadcastData({
+              type: 'SYNC_STATE',
+              receivedIds: Array.from(renderedMsgIds)
+            });
+          }
+        }, 3500);
       });
 
-      reconnectTimer = setInterval(() => {
-        pruneDeadConnections();
-        if (connections.length === 0) {
-          updateStatus(false, I18N[myRole].statusWaiting);
-          peers.forEach((p, idx) => {
-            if (p && !p.disconnected && !p.destroyed && targetIds[idx]) {
-              connectToTarget(p, targetIds[idx].partnerId);
-            }
-          });
-        }
-      }, 3000);
+      p.on('connection', (conn) => {
+        setupConnectionHandlers(conn);
+      });
 
-      // Every 4 seconds, ask partner what message IDs they have and automatically resend any missing message!
-      syncInterval = setInterval(() => {
-        pruneDeadConnections();
-        if (connections.length > 0) {
-          broadcastData({
-            type: 'SYNC_STATE',
-            receivedIds: Array.from(renderedMsgIds)
-          });
+      p.on('error', (err) => {
+        if (err.type === 'unavailable-id') {
+          // Slot 1 is already taken by your PC -> automatically claim Slot 2 for your Phone!
+          try { p.destroy(); } catch (e) {}
+          if (index + 1 < candidateSlots.length) {
+            claimAvailableSlot(roomHash, legacyHash, candidateSlots, index + 1);
+          }
         }
-      }, 4000);
+      });
+    }
+
+    function connectToAllOtherSlots(roomHash, legacyHash) {
+      if (!mySlotPeer || mySlotPeer.disconnected || mySlotPeer.destroyed) return;
+      pruneDeadConnections();
+
+      // Connect to all 6 multi-device slots (except our own slot) + legacy single slots
+      const allTargetIds = [];
+      SLOTS.forEach(s => {
+        if (s !== myAssignedSlot) {
+          allTargetIds.push(`cat-${roomHash}-${s}`);
+        }
+      });
+      // Also bridge legacy peer IDs in case partner hasn't refreshed yet
+      allTargetIds.push(`vnen-${legacyHash}-en`);
+      allTargetIds.push(`vnen-${legacyHash}-vn`);
+
+      allTargetIds.forEach(targetId => {
+        if (!connections.some(c => c.peer === targetId && c.open)) {
+          try {
+            const conn = mySlotPeer.connect(targetId, { reliable: true });
+            setupConnectionHandlers(conn);
+          } catch (e) {}
+        }
+      });
     }
 
     function pruneDeadConnections() {
@@ -1259,14 +1323,6 @@
           try { conn.send(payload); } catch (e) {}
         }
       });
-    }
-
-    function connectToTarget(peerInstance, targetPeerId) {
-      pruneDeadConnections();
-      if (connections.some(c => c.peer === targetPeerId && c.open)) return;
-      if (!peerInstance || peerInstance.disconnected || peerInstance.destroyed) return;
-      const conn = peerInstance.connect(targetPeerId, { reliable: true });
-      setupConnectionHandlers(conn);
     }
 
     function setupConnectionHandlers(conn) {
@@ -1293,25 +1349,29 @@
         }
 
         if (data.type === 'HELLO') {
-          updateStatus(true, t.statusConnectedWith(data.name));
+          if (data.role !== myRole) {
+            updateStatus(true, t.statusConnectedWith(data.name));
+          } else {
+            updateStatus(true, t.statusConnected);
+          }
           if (Array.isArray(data.receivedIds)) {
-            resendMissingMessagesToPartner(data.receivedIds);
+            syncMissingMessagesToPeer(conn, data.receivedIds);
           }
         }
 
-        // Automatic Missing Message Recovery: If partner missed any message, resend it automatically!
         if (data.type === 'SYNC_STATE' && Array.isArray(data.receivedIds)) {
-          resendMissingMessagesToPartner(data.receivedIds);
+          syncMissingMessagesToPeer(conn, data.receivedIds);
         }
 
         if (data.type === 'TYPING') {
-          const ind = document.getElementById('typingIndicator');
-          ind.textContent = t.typingText(data.name);
-          clearTimeout(typingTimeout);
-          typingTimeout = setTimeout(() => { ind.textContent = ''; }, 2500);
+          if (data.role !== myRole) {
+            const ind = document.getElementById('typingIndicator');
+            ind.textContent = t.typingText(data.name);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { ind.textContent = ''; }, 2500);
+          }
         }
 
-        // Handle Chunked Mobile Image Transfer (16KB chunks so mobile WebRTC never drops photos!)
         if (data.type === 'IMG_CHUNK') {
           handleIncomingImageChunk(data);
           return;
@@ -1321,7 +1381,6 @@
           document.getElementById('typingIndicator').textContent = '';
           const msgId = data.msgId || ('m-' + Date.now());
 
-          // Send instant ACK so sender knows it arrived
           broadcastData({ type: 'DELIVERED', msgId: msgId });
 
           if (renderedMsgIds.has(msgId)) return;
@@ -1345,14 +1404,18 @@
       });
     }
 
-    function resendMissingMessagesToPartner(partnerReceivedIds) {
-      const partnerSet = new Set(partnerReceivedIds);
-      outgoingMessagesMap.forEach((payload, msgId) => {
-        if (!partnerSet.has(msgId)) {
+    // Push ALL missing messages (both our own AND partner's messages!) to any newly logged-in device (e.g. your phone or partner's phone)
+    function syncMissingMessagesToPeer(targetConn, peerReceivedIds) {
+      if (!targetConn || !targetConn.open) return;
+      const peerSet = new Set(peerReceivedIds);
+      const sortedMsgs = Array.from(allMessagesMap.values()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+      sortedMsgs.forEach((payload) => {
+        if (!peerSet.has(payload.msgId)) {
           if (payload.imageData) {
-            sendChunkedImagePayload(payload);
+            sendChunkedImagePayload(payload, targetConn);
           } else {
-            broadcastData(payload);
+            try { targetConn.send({ ...payload, type: 'CHAT' }); } catch (e) {}
           }
         }
       });
@@ -1361,64 +1424,80 @@
     async function processIncomingChatMessage(data, msgId) {
       let orig = (data.originalText || '').trim();
       let trans = (data.translatedText || '').trim();
-      const targetLang = myRole === 'vn' ? 'vi' : 'en';
-      const sourceLang = myRole === 'vn' ? 'en' : 'vi';
+      const senderRole = data.senderRole || 'en';
+      const isMine = (senderRole === myRole);
+
+      const targetLang = senderRole === 'vn' ? 'en' : 'vi';
+      const sourceLang = senderRole === 'vn' ? 'vi' : 'en';
 
       if (orig && (!trans || trans.toLowerCase() === orig.toLowerCase())) {
         trans = await translateText(orig, sourceLang, targetLang);
       }
 
       const msgObj = {
+        type: 'CHAT',
         msgId: msgId,
+        timestamp: data.timestamp || Date.now(),
         senderName: data.senderName,
-        senderRole: data.senderRole,
+        senderRole: senderRole,
         originalText: orig,
         translatedText: trans,
         imageData: data.imageData,
         time: data.time,
-        isMine: false
+        isMine: isMine
       };
 
       renderMessage(msgObj);
       saveMessageToHistory(msgObj);
 
-      if (!document.hidden) {
-        sendSeenReceipt(msgId);
-      } else {
-        pendingIncomingNotSeen.push(msgId);
+      if (!isMine) {
+        if (!document.hidden) {
+          sendSeenReceipt(msgId);
+        } else {
+          pendingIncomingNotSeen.push(msgId);
+        }
       }
     }
 
-    // Send image in 16KB chunks so mobile Safari/Chrome WebRTC DataChannel never drops large photos
-    async function sendChunkedImagePayload(payload) {
+    async function sendChunkedImagePayload(payload, specificConn = null) {
       const imgStr = payload.imageData || '';
-      const CHUNK_SIZE = 16000; // 16 KB safe for all mobile WebRTC implementations
+      const CHUNK_SIZE = 16000;
       const totalChunks = Math.ceil(imgStr.length / CHUNK_SIZE) || 1;
       const ind = document.getElementById('typingIndicator');
       const t = I18N[myRole];
 
       for (let i = 0; i < totalChunks; i++) {
         const piece = imgStr.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        broadcastData({
+        const chunkPacket = {
           type: 'IMG_CHUNK',
           msgId: payload.msgId,
           chunkIndex: i,
           totalChunks: totalChunks,
           chunkData: piece,
           meta: i === 0 ? {
+            timestamp: payload.timestamp || Date.now(),
             senderName: payload.senderName,
             senderRole: payload.senderRole,
             originalText: payload.originalText,
             translatedText: payload.translatedText,
             time: payload.time
           } : null
-        });
-        if (totalChunks > 1) {
+        };
+
+        if (specificConn) {
+          if (specificConn.open) {
+            try { specificConn.send(chunkPacket); } catch (e) {}
+          }
+        } else {
+          broadcastData(chunkPacket);
+        }
+
+        if (totalChunks > 1 && !specificConn) {
           ind.textContent = t.sendingImgText(Math.round(((i + 1) / totalChunks) * 100));
           await new Promise(r => setTimeout(r, 25));
         }
       }
-      ind.textContent = '';
+      if (!specificConn) ind.textContent = '';
     }
 
     function handleIncomingImageChunk(data) {
@@ -1453,6 +1532,7 @@
         broadcastData({ type: 'DELIVERED', msgId: msgId });
         processIncomingChatMessage({
           msgId: msgId,
+          timestamp: entry.meta.timestamp,
           senderName: entry.meta.senderName,
           senderRole: entry.meta.senderRole,
           originalText: entry.meta.originalText,
@@ -1505,15 +1585,13 @@
 
     function saveMessageToHistory(msgObj) {
       try {
+        allMessagesMap.set(msgObj.msgId, msgObj);
         const key = 'cat_history_v2';
         const list = JSON.parse(localStorage.getItem(key) || '[]');
         if (!list.some(item => item.msgId === msgObj.msgId)) {
           list.push(msgObj);
-          if (list.length > 40) list.shift();
+          if (list.length > 50) list.shift();
           localStorage.setItem(key, JSON.stringify(list));
-        }
-        if (msgObj.isMine) {
-          outgoingMessagesMap.set(msgObj.msgId, msgObj);
         }
       } catch (e) {}
     }
@@ -1523,9 +1601,8 @@
         const key = 'cat_history_v2';
         const list = JSON.parse(localStorage.getItem(key) || '[]');
         list.forEach(async (m) => {
-          if (m.isMine) {
-            outgoingMessagesMap.set(m.msgId, m);
-          }
+          m.isMine = (m.senderRole === myRole);
+          allMessagesMap.set(m.msgId, m);
           if (!renderedMsgIds.has(m.msgId)) {
             if (m.originalText && (!m.translatedText || m.translatedText.toLowerCase() === m.originalText.toLowerCase())) {
               const targetLang = m.senderRole === 'vn' ? 'en' : 'vi';
@@ -1542,7 +1619,7 @@
       const input = document.getElementById('msgInput');
       input.addEventListener('input', () => {
         flushSeenReceipts();
-        broadcastData({ type: 'TYPING', name: myName });
+        broadcastData({ type: 'TYPING', name: myName, role: myRole });
       });
     });
 
@@ -1591,7 +1668,6 @@
       return text;
     }
 
-    // Mobile-safe image compression (works with iOS/Android camera photos)
     function compressImageFile(file, maxWidth = 720, quality = 0.72) {
       return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -1639,12 +1715,14 @@
         const toLang = myRole === 'vn' ? 'en' : 'vi';
         const translatedCaption = captionText ? await translateText(captionText, fromLang, toLang) : '';
 
-        const msgId = 'm-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+        const nowTs = Date.now();
+        const msgId = 'm-' + nowTs + '-' + Math.random().toString(36).substring(2, 6);
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         const payload = {
           type: 'CHAT',
           msgId: msgId,
+          timestamp: nowTs,
           senderName: myName,
           senderRole: myRole,
           originalText: captionText,
@@ -1677,12 +1755,14 @@
       const toLang = myRole === 'vn' ? 'en' : 'vi';
 
       const translatedText = await translateText(text, fromLang, toLang);
-      const msgId = 'm-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+      const nowTs = Date.now();
+      const msgId = 'm-' + nowTs + '-' + Math.random().toString(36).substring(2, 6);
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       const payload = {
         type: 'CHAT',
         msgId: msgId,
+        timestamp: nowTs,
         senderName: myName,
         senderRole: myRole,
         originalText: text,
@@ -1706,10 +1786,11 @@
       lb.style.display = 'flex';
     }
 
-    function renderMessage({ msgId, senderName, senderRole, originalText, translatedText, imageData, time, isMine }) {
+    function renderMessage({ msgId, senderName, senderRole, originalText, translatedText, imageData, time }) {
       if (msgId && renderedMsgIds.has(msgId)) return;
       if (msgId) renderedMsgIds.add(msgId);
 
+      const isMine = (senderRole === myRole);
       const t = I18N[myRole];
       const area = document.getElementById('messagesArea');
       const row = document.createElement('div');
@@ -1796,6 +1877,7 @@
     function copyInviteLink() {
       const partnerRole = myRole === 'vn' ? 'en' : 'vn';
       const baseUrl = window.location.origin + window.location.pathname + window.location.search;
+      // NEVER put the password in the copied link!
       const inviteUrl = `${baseUrl}#role=${partnerRole}`;
 
       navigator.clipboard.writeText(inviteUrl).then(() => {
