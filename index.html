@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>🐱 Private Translation Chat ⇄ Phòng Chat Phiên Dịch</title>
   <!-- PeerJS for Serverless Direct Encrypted WebRTC P2P -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -225,6 +228,12 @@
     .input-box:focus {
       border-color: #f472b6;
       box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
+    }
+
+    /* Mobile Anti-Autofill Masked Input: uses type="text" with disc masking so iOS/Android password managers NEVER autofill it! */
+    .masked-pin-input {
+      -webkit-text-security: disc;
+      text-security: disc;
     }
 
     .pin-error-msg {
@@ -987,17 +996,19 @@
       <label>
         <span id="lblPin">🔒 Room Password (Required)</span>
       </label>
-      <!-- Anti-browser-autofill trick: readonly until focused, never pre-filled, never auto-joined -->
+      <!-- Zero-Autofill Mobile Input: type="text" with CSS disc masking completely bypasses iOS Keychain & Android Google Password Manager autofill -->
       <input
-        type="password"
+        type="text"
         id="inputPin"
-        name="room_secret_key_no_autofill"
-        class="input-box"
+        class="input-box masked-pin-input"
         placeholder="Enter secret room password..."
         value=""
-        autocomplete="new-password"
-        readonly
-        onfocus="this.removeAttribute('readonly');"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        data-lpignore="true"
+        data-form-type="other"
         onkeydown="if(event.key==='Enter') joinPrivateRoom();"
       />
     </div>
@@ -1349,10 +1360,20 @@
       const savedRole = localStorage.getItem('cat_chat_role');
       const savedName = localStorage.getItem('cat_chat_name');
 
-      // Force password box to be 100% empty on every page load
+      // Force password box to be 100% empty on every page load & randomize name attribute so mobile browsers never autofill
       const pinInput = document.getElementById('inputPin');
+      pinInput.setAttribute('name', 'pin_code_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7));
       pinInput.value = '';
       setTimeout(() => { pinInput.value = ''; }, 50);
+      setTimeout(() => { pinInput.value = ''; }, 250);
+      setTimeout(() => { pinInput.value = ''; }, 600);
+
+      // Force mobile browser to bypass stale HTML cache if URL doesn't have latest version query ?v=5
+      if (window.location.protocol.startsWith('http') && !window.location.search.includes('v=5')) {
+        const cleanUrl = window.location.origin + window.location.pathname + '?v=5' + window.location.hash;
+        window.location.replace(cleanUrl);
+        return;
+      }
 
       if (urlRole === 'vn' || savedRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
         selectRole('vn');
