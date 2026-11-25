@@ -1623,26 +1623,171 @@
       });
     });
 
+    // ============================================================================
+    // CULTURAL & CONTEXTUAL NORMALIZER FOR NATURAL VIETNAMESE <-> ENGLISH CHAT
+    // ============================================================================
+    const VI_ABBR_MAP = {
+      'ko': 'không', 'k': 'không', 'kh': 'không', 'hong': 'không', 'hông': 'không', 'hem': 'không',
+      'dc': 'được', 'đc': 'được', 'dk': 'được',
+      'vs': 'với', 'vz': 'với',
+      'j': 'gì', 'z': 'vậy', 'v': 'vậy', 'zậy': 'vậy',
+      'r': 'rồi', 'rùi': 'rồi',
+      'cx': 'cũng', 'cũg': 'cũng',
+      'bt': 'biết', 'bít': 'biết',
+      'nt': 'nhắn tin', 'ib': 'nhắn tin',
+      'đag': 'đang', 'dag': 'đang',
+      'uk': 'ừ', 'ukm': 'ừ', 'ừm': 'ừ', 'uh': 'ừ', 'uhm': 'ừ',
+      'oki': 'ok', 'oke': 'ok', 'okela': 'ok',
+      'lun': 'luôn', 'luon': 'luôn',
+      'bik': 'biết', 'thik': 'thích',
+      'iu': 'yêu', 'thik': 'thích',
+      'ng': 'người', 'ngta': 'người ta',
+      'mik': 'mình', 'mk': 'mình', 'mìk': 'mình',
+      'tui': 'tôi', 'tớ': 'tôi',
+      'b': 'bạn', 'bn': 'bạn', 'cậu': 'bạn',
+      'h': 'giờ', 'bh': 'bây giờ', 'bjo': 'bây giờ',
+      'trc': 'trước', 'ms': 'mới',
+      'wa': 'quá', 'qá': 'quá', 'wá': 'quá',
+      'đt': 'điện thoại', 'dt': 'điện thoại',
+      'tks': 'cảm ơn', 'thankiu': 'cảm ơn'
+    };
+
+    const EN_ABBR_MAP = {
+      'u': 'you', 'ur': 'your', 'r': 'are', 'y': 'why',
+      'idk': 'I do not know', 'ikr': 'I know right', 'tbh': 'to be honest',
+      'ngl': 'not gonna lie', 'imo': 'in my opinion', 'imho': 'in my humble opinion',
+      'btw': 'by the way', 'omg': 'oh my god', 'omw': 'on my way',
+      'wyd': 'what are you doing', 'hbu': 'how about you', 'wbu': 'what about you',
+      'nvm': 'never mind', 'brb': 'be right back', 'gtg': 'got to go', 'g2g': 'got to go',
+      'rn': 'right now', 'fr': 'for real', 'istg': 'I swear to god',
+      'pls': 'please', 'plz': 'please', 'thx': 'thanks', 'ty': 'thank you', 'tysm': 'thank you so much',
+      'np': 'no problem', 'yw': 'you are welcome',
+      'gonna': 'going to', 'wanna': 'want to', 'gotta': 'got to',
+      'kinda': 'kind of', 'sorta': 'sort of', 'lemme': 'let me', 'gimme': 'give me',
+      'cuz': 'because', 'cos': 'because', 'bc': 'because',
+      'yeah': 'yes', 'yep': 'yes', 'yup': 'yes', 'nah': 'no', 'nope': 'no'
+    };
+
+    function preprocessVietnameseForEnglish(rawText) {
+      let s = rawText.trim();
+
+      // 1. Expand common Vietnamese chat abbreviations word-by-word
+      s = s.replace(/(^|\s)([a-zA-ZÀ-ỹ]+)(?=\s|[.,!?]|$)/g, (match, prefix, word) => {
+        const lower = word.toLowerCase();
+        if (VI_ABBR_MAP[lower]) {
+          return prefix + VI_ABBR_MAP[lower];
+        }
+        return match;
+      });
+
+      // 2. Normalize affectionate/Vietnamese relational pronouns so machine translators never translate "anh/em" as "brother/sister"
+      s = s.replace(/\b(anh|mình|tớ|tui|tao)\b/gi, 'tôi');
+      s = s.replace(/\b(em|cậu|bạn ấy|đằng ấy)\b/gi, 'bạn');
+      s = s.replace(/\b(cổ|cô ấy|bả)\b/gi, 'cô ấy');
+
+      // 3. Handle common subject-dropped Vietnamese conversational phrases
+      s = s.replace(/^đang làm gì( đó| vậy| thế| đấy)?(\?)?$/i, 'Bạn đang làm gì vậy?');
+      s = s.replace(/^ăn cơm chưa(\?)?$/i, 'Bạn đã ăn tối chưa?');
+      s = s.replace(/^ăn gì chưa(\?)?$/i, 'Bạn đã ăn gì chưa?');
+      s = s.replace(/^ngủ chưa(\?)?$/i, 'Bạn đã đi ngủ chưa?');
+      s = s.replace(/^về chưa(\?)?$/i, 'Bạn đã về nhà chưa?');
+      s = s.replace(/^sao vậy(\?)?$/i, 'Tại sao vậy?');
+      s = s.replace(/^sao thế(\?)?$/i, 'Tại sao vậy?');
+      s = s.replace(/^thật hả(\?)?$/i, 'Thật vậy sao?');
+      s = s.replace(/^thiệt hả(\?)?$/i, 'Thật vậy sao?');
+
+      // 4. Clean trailing Vietnamese filler particles that confuse English syntax ("nha", "nhé", "nè", "nghen", "á")
+      s = s.replace(/\s+(nha|nhé|nè|nghen|hen|nhỉ|đó nha|đấy nhé)([.!?]*)$/i, '$2');
+      s = s.replace(/^ủa\s+/i, 'Ồ, ');
+
+      return s;
+    }
+
+    function preprocessEnglishForVietnamese(rawText) {
+      let s = rawText.trim();
+      // Expand English internet slang & abbreviations before translating
+      s = s.replace(/(^|\s)([a-zA-Z0-9]+)(?=\s|[.,!?]|$)/g, (match, prefix, word) => {
+        const lower = word.toLowerCase();
+        if (EN_ABBR_MAP[lower]) {
+          return prefix + EN_ABBR_MAP[lower];
+        }
+        return match;
+      });
+      return s;
+    }
+
+    function postprocessVietnameseOutput(viText) {
+      let s = viText.trim();
+      // Make machine-translated Vietnamese sound natural, warm, and conversational
+      s = s.replace(/\bBạn\b/g, 'Em');
+      s = s.replace(/\bbạn\b/g, 'em');
+      s = s.replace(/\bTôi\b/g, 'Mình');
+      s = s.replace(/\btôi\b/g, 'mình');
+      return s;
+    }
+
     async function translateText(text, fromLang, toLang) {
       if (!text || !text.trim()) return '';
       if (!/\p{L}/u.test(text)) return text;
 
+      // Normalize slang, pronouns, and dropped subjects according to each country's culture
+      const preparedText = fromLang === 'vi'
+        ? preprocessVietnameseForEnglish(text)
+        : preprocessEnglishForVietnamese(text);
+
+      // Engine 1: Contextual AI LLM Translator (Pollinations OpenAI GPT-4o-mini endpoint - Free, No Key, Natural Idiomatic Meaning)
       try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+        const sysPrompt = fromLang === 'vi'
+          ? 'You are a native English & Vietnamese bilingual interpreter helping a Vietnamese guy chat with his female friend in Europe. Translate the Vietnamese message into natural, warm, clear, idiomatic conversational English that a native speaker immediately understands. Note: in Vietnamese, "anh/mình/tôi" means "I/me" and "em/bạn" means "you" (NEVER translate them as brother or sister). Preserve emojis. Output ONLY the final English translation, nothing else.'
+          : 'You are a native English & Vietnamese bilingual interpreter helping a female friend in Europe chat with a Vietnamese guy. Translate the English message into natural, warm, clear, conversational Vietnamese (use friendly pronouns like "mình" for I and "bạn" for you, natural Vietnamese phrasing, not robotic word-for-word). Preserve emojis. Output ONLY the final Vietnamese translation, nothing else.';
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3200);
+
+        const aiRes = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model: 'openai',
+            messages: [
+              { role: 'system', content: sysPrompt },
+              { role: 'user', content: text }
+            ],
+            temperature: 0.3
+          })
+        });
+        clearTimeout(timeoutId);
+
+        if (aiRes.ok) {
+          const aiJson = await aiRes.json();
+          const aiOut = aiJson?.choices?.[0]?.message?.content?.trim();
+          if (aiOut && aiOut.length > 0 && aiOut.toLowerCase() !== text.trim().toLowerCase()) {
+            return aiOut.replace(/^["']|["']$/g, '');
+          }
+        }
+      } catch (aiErr) {
+        // Fallback smoothly to neural translation using our culturally normalized text
+      }
+
+      // Engine 2: Google Neural Machine Translation (GTX) with Culturally Normalized Input
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(preparedText)}`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && Array.isArray(data[0])) {
             const out = data[0].map(segment => segment[0]).join('');
-            if (out && out.trim().toLowerCase() !== text.trim().toLowerCase()) {
+            if (out && out.trim()) {
               return out;
             }
           }
         }
       } catch (err) {}
 
+      // Engine 3: Google Clients5 Dictionary/Translation Endpoint
       try {
-        const url2 = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${fromLang}&tl=${toLang}&q=${encodeURIComponent(text)}`;
+        const url2 = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${fromLang}&tl=${toLang}&q=${encodeURIComponent(preparedText)}`;
         const res2 = await fetch(url2);
         if (res2.ok) {
           const data2 = await res2.json();
@@ -1653,9 +1798,10 @@
         }
       } catch (err2) {}
 
+      // Engine 4: MyMemory Translated.net CORS-friendly API
       try {
         const pair = `${fromLang}|${toLang}`;
-        const url3 = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(pair)}`;
+        const url3 = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(preparedText)}&langpair=${encodeURIComponent(pair)}`;
         const res3 = await fetch(url3);
         if (res3.ok) {
           const data3 = await res3.json();
