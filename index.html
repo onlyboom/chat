@@ -566,13 +566,76 @@
     }
 
     .chat-input-bar {
+      position: relative;
       padding: 13px 16px;
       background: rgba(36, 25, 64, 0.96);
       border-top: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       gap: 10px;
-      z-index: 3;
+      z-index: 10;
+    }
+
+    /* TikTok-style Emoji Picker Popover */
+    .emoji-picker-popover {
+      display: none;
+      position: absolute;
+      bottom: 74px;
+      left: 16px;
+      width: 330px;
+      max-width: calc(100vw - 32px);
+      background: rgba(28, 20, 52, 0.98);
+      backdrop-filter: blur(18px);
+      border: 2px solid rgba(244, 114, 182, 0.45);
+      border-radius: 22px;
+      padding: 14px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .emoji-picker-popover.open {
+      display: block;
+    }
+
+    .emoji-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fbcfe8;
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      max-height: 215px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .emoji-item {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid transparent;
+      border-radius: 11px;
+      font-size: 1.4rem;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.14s ease, background 0.14s ease;
+    }
+
+    .emoji-item:hover {
+      background: rgba(244, 114, 182, 0.28);
+      border-color: rgba(244, 114, 182, 0.5);
+      transform: scale(1.18);
     }
 
     .upload-btn {
@@ -854,9 +917,21 @@
     <div class="typing-indicator" id="typingIndicator"></div>
 
     <form class="chat-input-bar" onsubmit="handleSendMessage(event)">
+      <!-- TikTok Style Emoji Picker Popover -->
+      <div class="emoji-picker-popover" id="emojiPopover">
+        <div class="emoji-picker-header">
+          <span id="emojiHeaderTitle">✨ Cảm xúc TikTok / Emojis</span>
+          <span style="cursor:pointer;font-size:1rem;" onclick="toggleEmojiPicker(event)">✕</span>
+        </div>
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
+
       <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)" />
       <button type="button" class="upload-btn" id="btnUploadImg" onclick="document.getElementById('imageInput').click()" title="Send Photo / Gửi ảnh">
         📷
+      </button>
+      <button type="button" class="upload-btn" id="btnEmoji" onclick="toggleEmojiPicker(event)" title="Chọn Icon mặt cười / Emojis">
+        😊
       </button>
       <input
         type="text"
@@ -959,7 +1034,62 @@
     let pendingIncomingNotSeen = [];
     let renderedMsgIds = new Set();
 
+    const TIKTOK_EMOJIS = [
+      '😂', '🤣', '😜', '😝', '🤪', '🥰', '😍',
+      '😘', '😚', '😊', '😉', '🤭', '🫣', '🤗',
+      '😭', '🥺', '😢', '😤', '😡', '🤯', '😱',
+      '🤔', '🤨', '🙄', '😏', '😌', '😴', '🤤',
+      '❤️', '🩷', '💖', '💘', '💔', '🔥', '✨',
+      '🐱', '🐾', '🙈', '🙉', '🙊', '👻', '💩',
+      '👍', '👎', '👏', '🙌', '🫶', '🤝', '🙏',
+      '🎉', '🥳', '🌹', '🌸', '🍀', '🍕', '🧋'
+    ];
+
+    function initEmojiPicker() {
+      const grid = document.getElementById('emojiGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      TIKTOK_EMOJIS.forEach(emo => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'emoji-item';
+        btn.textContent = emo;
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          insertEmoji(emo);
+        };
+        grid.appendChild(btn);
+      });
+
+      document.addEventListener('click', (e) => {
+        const pop = document.getElementById('emojiPopover');
+        const btn = document.getElementById('btnEmoji');
+        if (pop && pop.classList.contains('open') && !pop.contains(e.target) && e.target !== btn) {
+          pop.classList.remove('open');
+        }
+      });
+    }
+
+    function toggleEmojiPicker(e) {
+      if (e) e.stopPropagation();
+      const pop = document.getElementById('emojiPopover');
+      if (pop) pop.classList.toggle('open');
+    }
+
+    function insertEmoji(emo) {
+      const input = document.getElementById('msgInput');
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? input.value.length;
+      const text = input.value;
+      input.value = text.slice(0, start) + emo + text.slice(end);
+      input.focus();
+      const nextPos = start + emo.length;
+      input.setSelectionRange(nextPos, nextPos);
+      broadcastData({ type: 'TYPING', name: myName });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      initEmojiPicker();
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const urlPin = params.get('pin');
