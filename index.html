@@ -852,7 +852,7 @@
       <label>
         <span id="lblPin">🔒 Secret Room Code (Room PIN)</span>
       </label>
-      <input type="text" id="inputPin" class="input-box" placeholder="Enter your shared secret code (e.g. agrafkens)" value="agrafkens" />
+      <input type="password" id="inputPin" class="input-box" placeholder="Enter your shared secret code" value="" autocomplete="off" />
     </div>
 
     <div class="security-note" id="uiSecurityNote">
@@ -963,7 +963,7 @@
         namePlaceholder: 'E.g. Emma',
         defaultName: 'Emma 🐱',
         lblPin: '🔒 Secret Room Code (Room PIN)',
-        pinPlaceholder: 'Enter your shared secret code (e.g. agrafkens)',
+        pinPlaceholder: 'Enter your shared secret code',
         securityHtml: '<strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).',
         btnJoin: 'Start Private Chat 🐾 →',
         roomTitle: '🐱 Private Translation Chat',
@@ -996,7 +996,7 @@
         namePlaceholder: 'Ví dụ: Huy',
         defaultName: 'Huy 🐱',
         lblPin: '🔒 Mã khóa phòng bí mật (Room PIN)',
-        pinPlaceholder: 'Nhập mã bí mật chung của 2 người (VD: agrafkens)',
+        pinPlaceholder: 'Nhập mã bí mật chung của 2 người',
         securityHtml: '<strong>Bảo mật P2P 100%:</strong> Tin nhắn & hình ảnh truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người.',
         btnJoin: 'Vào Phòng Chat 🐾 →',
         roomTitle: '🐱 Phòng Chat Mèo Con',
@@ -1023,9 +1023,41 @@
       }
     };
 
+    // Anti-F12 / Anti-Inspect / Right-Click Protection & Encoded Default Room Key
+    const _0xK = [97, 103, 114, 97, 102, 107, 101, 110, 115];
+    const _getDefPin = () => String.fromCharCode(..._0xK);
+
+    (function protectSourceCode() {
+      // 1. Block Right-Click Context Menu
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+      });
+
+      // 2. Block F12, Ctrl+Shift+I/J/C, Ctrl+U, Cmd+Opt+I/J/C/U
+      document.addEventListener('keydown', (e) => {
+        const k = (e.key || '').toUpperCase();
+        if (
+          e.keyCode === 123 ||
+          k === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'K'].includes(k)) ||
+          (e.metaKey && e.altKey && ['I', 'J', 'C', 'K', 'U'].includes(k)) ||
+          (e.ctrlKey && ['U', 'S'].includes(k)) ||
+          (e.metaKey && ['U', 'S'].includes(k))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, true);
+
+      // 3. Block dragging/selecting sensitive UI
+      document.addEventListener('dragstart', (e) => e.preventDefault());
+    })();
+
     let myRole = 'en';
     let myName = '';
-    let roomPin = 'agrafkens';
+    let roomPin = _getDefPin();
     let peer = null;
     // Keep track of ALL active connections (both incoming & outgoing, plus legacy IDs) so messages ALWAYS go through both ways!
     let connections = [];
@@ -1098,13 +1130,14 @@
       const savedName = localStorage.getItem('cat_chat_name');
       const savedPin = localStorage.getItem('cat_chat_pin');
 
+      const defPin = _getDefPin();
       if (urlPin) {
         document.getElementById('inputPin').value = urlPin;
       } else if (savedPin && savedPin !== 'huy2026') {
         document.getElementById('inputPin').value = savedPin;
       } else {
-        document.getElementById('inputPin').value = 'agrafkens';
-        localStorage.setItem('cat_chat_pin', 'agrafkens');
+        document.getElementById('inputPin').value = defPin;
+        localStorage.setItem('cat_chat_pin', defPin);
       }
 
       if (urlRole === 'vn' || savedRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
