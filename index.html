@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🇬🇧 Private Translation Chat ⇄ 🇻🇳 Phòng Chat Phiên Dịch</title>
+  <!-- PeerJS for Serverless Direct Encrypted WebRTC P2P -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
+      --card-bg: rgba(30, 41, 59, 0.78);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-vn: #ef4444;
+      --accent-en: #3b82f6;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --my-bubble: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      --peer-bubble: rgba(51, 65, 85, 0.85);
+      --success: #22c55e;
+      --warning: #eab308;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Setup / Login Screen */
+    .login-container {
+      width: 92%;
+      max-width: 440px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.35s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .flags-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .brand-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .role-card {
+      background: rgba(15, 23, 42, 0.55);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .role-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .role-card.active-vn {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+    }
+
+    .role-card.active-en {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .role-flag {
+      font-size: 2rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .role-title {
+      font-weight: 600;
+      font-size: 0.92rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .role-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .input-box {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-box:focus {
+      border-color: var(--primary);
+    }
+
+    .security-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      color: #bbf7d0;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--my-bubble);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.99);
+    }
+
+    /* Main Chat Screen */
+    .chat-container {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: 780px;
+      height: 100dvh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+    }
+
+    @media (min-width: 780px) {
+      .chat-container {
+        height: 92dvh;
+        border-radius: 24px;
+        border: 1px solid var(--card-border);
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+      }
+    }
+
+    .chat-header {
+      padding: 14px 18px;
+      background: rgba(30, 41, 59, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+      transition: all 0.3s;
+    }
+
+    .status-dot.online {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .room-info h2 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .room-info p {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    .system-banner {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 8px 16px;
+      border-radius: 999px;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .msg-row.mine {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .msg-row.theirs {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .msg-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .msg-bubble {
+      padding: 12px 15px;
+      border-radius: 18px;
+      position: relative;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .msg-row.mine .msg-bubble {
+      background: var(--my-bubble);
+      border-bottom-right-radius: 4px;
+      color: #fff;
+    }
+
+    .msg-row.theirs .msg-bubble {
+      background: var(--peer-bubble);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom-left-radius: 4px;
+      color: #f8fafc;
+    }
+
+    .primary-text {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .secondary-text {
+      font-size: 0.82rem;
+      opacity: 0.78;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tts-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .tts-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.08);
+    }
+
+    .typing-indicator {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      padding: 0 20px 6px;
+      min-height: 22px;
+      font-style: italic;
+    }
+
+    .chat-input-bar {
+      padding: 14px 16px;
+      background: rgba(30, 41, 59, 0.9);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 13px 16px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+
+    .send-btn {
+      background: var(--my-bubble);
+      color: #fff;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Modal for AI API Key Optional Upgrade */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      padding: 24px;
+    }
+
+    .modal-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10b981;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. LOGIN / SETUP SCREEN -->
+  <div class="login-container" id="loginScreen">
+    <div class="brand-header">
+      <div class="flags-badge" id="flagsBadge">🇬🇧 English ⇄ Vietnamese 🇻🇳</div>
+      <h1 id="uiTitle">Private Translation Chat (EN ⇄ VN)</h1>
+      <p id="uiSubtitle">Type in English → He receives it instantly in Vietnamese, and vice versa in real-time!</p>
+    </div>
+
+    <div class="role-selector">
+      <div class="role-card active-en" id="roleEN" onclick="selectRole('en')">
+        <span class="role-flag">🇬🇧</span>
+        <span class="role-title">I speak English</span>
+        <span class="role-sub">Type & read in English</span>
+      </div>
+      <div class="role-card" id="roleVN" onclick="selectRole('vn')">
+        <span class="role-flag">🇻🇳</span>
+        <span class="role-title">Tôi ở Việt Nam</span>
+        <span class="role-sub">Gõ & đọc Tiếng Việt</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <span id="lblName">Your Name</span>
+      </label>
+      <input type="text" id="inputName" class="input-box" placeholder="E.g. Emma" value="" />
+    </div>
+
+    <div class="form-group">
+      <label>
+        <span id="lblPin">🔒 Secret Room Code (Room PIN)</span>
+      </label>
+      <input type="text" id="inputPin" class="input-box" placeholder="Enter your shared secret code (e.g. huy2026)" value="huy2026" />
+    </div>
+
+    <div class="security-note" id="uiSecurityNote">
+      <span>🛡️</span>
+      <span id="uiSecurityText"><strong>100% Private P2P Connection:</strong> Only someone with this secret room code can join. Messages are sent directly between your two browsers (max 2 people).</span>
+    </div>
+
+    <button class="btn-primary" id="btnJoin" onclick="joinPrivateRoom()">
+      Start Private Chat →
+    </button>
+  </div>
+
+  <!-- 2. CHAT SCREEN -->
+  <div class="chat-container" id="chatScreen">
+    <div class="chat-header">
+      <div class="header-left">
+        <div class="status-dot" id="statusDot"></div>
+        <div class="room-info">
+          <h2 id="roomTitle">🇬🇧 ⇄ 🇻🇳 Private Translation Chat</h2>
+          <p id="peerStatus">Waiting for connection with Vietnam...</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="copyInviteLink()" id="btnInvite" title="Copy Invite Link">
+          🔗 Copy Invite Link
+        </button>
+        <button class="icon-btn" onclick="toggleAiModal()" id="btnAiEngine" title="AI Translation Settings">
+          ✨ AI Engine
+        </button>
+      </div>
+    </div>
+
+    <div class="messages-area" id="messagesArea">
+      <div class="system-banner" id="welcomeBanner">
+        🔒 Private P2P connection active. Just type in English, it will automatically translate into Vietnamese!
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator"></div>
+
+    <form class="chat-input-bar" onsubmit="handleSendMessage(event)">
+      <input
+        type="text"
+        id="msgInput"
+        class="chat-input"
+        placeholder="Type here in English... (Automatically translated to Vietnamese)"
+        autocomplete="off"
+      />
+      <button type="submit" class="send-btn" id="btnSend">
+        <span id="lblSend">Send</span> 🚀
+      </button>
+    </form>
+  </div>
+
+  <!-- 3. OPTIONAL AI ENGINE MODAL -->
+  <div class="modal-backdrop" id="aiModal">
+    <div class="modal-card">
+      <h3 id="modalTitle">✨ Translation Engine</h3>
+      <p id="modalDesc">
+        By default, this chat uses <strong>Google Neural Translate (100% Free)</strong> with zero setup.
+        Optionally, you can paste a free <strong>Gemini AI API Key</strong> below for even more natural translations:
+      </p>
+      <div class="form-group">
+        <label id="modalKeyLabel">Gemini API Key (Optional - Leave blank for free translation)</label>
+        <input type="password" id="geminiKeyInput" class="input-box" placeholder="AIzaSy..." />
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="icon-btn" id="modalCloseBtn" onclick="toggleAiModal()">Close</button>
+        <button class="icon-btn" id="modalSaveBtn" style="background:#4f46e5; border-color:#6366f1;" onclick="saveAiKey()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg">Invite link copied!</div>
+
+  <script>
+    // Complete Localized Dictionary (100% English for 'en', 100% Vietnamese for 'vn')
+    const I18N = {
+      en: {
+        badge: '🇬🇧 English ⇄ Vietnamese 🇻🇳',
+        title: 'Private Translation Chat (EN ⇄ VN)',
+        subtitle: 'Type in English → He receives it instantly in Vietnamese, and vice versa in real-time!',
+        lblName: 'Your Name',
+        namePlaceholder: 'E.g. Emma',
+        defaultName: 'Emma 🇬🇧',
+        lblPin: '🔒 Secret Room Code (Room PIN)',
+        pinPlaceholder: 'Enter your shared secret code (e.g. huy2026)',
+        securityHtml: '<strong>100% Private P2P Connection:</strong> Only someone with this secret room code can join. Messages are sent directly between your two browsers (max 2 people).',
+        btnJoin: 'Start Private Chat →',
+        roomTitle: '🇬🇧 ⇄ 🇻🇳 Private Translation Chat',
+        statusInit: 'Starting secure channel...',
+        statusWaiting: 'Waiting for your friend in Vietnam to connect...',
+        statusConnected: '🟢 Connected directly with Vietnam!',
+        statusConnectedWith: (name) => `🟢 Connected with ${name} 🇻🇳`,
+        statusDisconnected: '🟡 Disconnected. Waiting to reconnect...',
+        joinedBanner: (name) => `🎉 ${name} (Vietnam) is now online in the chat!`,
+        welcomeBanner: '🔒 Private P2P connection active. Just type in English, it will automatically translate into Vietnamese!',
+        typingText: (name) => `${name} is typing in Vietnamese...`,
+        inputPlaceholder: 'Type here in English... (Translated to Vietnamese)',
+        btnSend: 'Send',
+        btnInvite: '🔗 Copy Link',
+        btnAiEngine: '✨ AI Engine',
+        translatedToPeer: (flag, text) => `Translated to ${flag}: ${text}`,
+        originalFromPeer: (flag, text) => `Original ${flag}: ${text}`,
+        ttsTitle: 'Listen to pronunciation',
+        pinAlert: 'Please enter a Room Code with at least 4 characters!',
+        roomLockedAlert: 'This private room already has 2 people and is locked!',
+        dupRoleAlert: 'This role is already open in another tab! Please close the other tab.',
+        toastCopied: '✅ Invite link copied!',
+        toastAiOn: '✨ Gemini AI translation enabled!',
+        toastAiOff: 'Default free Google Neural Translate active!',
+        modalTitle: '✨ Translation Engine',
+        modalDesc: 'By default, this chat uses <strong>Google Neural Translate (100% Free)</strong> with zero setup. Optionally, you can enter a free <strong>Gemini AI API Key</strong>:',
+        modalKeyLabel: 'Gemini API Key (Optional - Leave blank for free translation)',
+        modalCloseBtn: 'Close',
+        modalSaveBtn: 'Save'
+      },
+      vn: {
+        badge: '🇻🇳 Tiếng Việt ⇄ English 🇬🇧',
+        title: 'Phòng Chat Phiên Dịch Riêng Tư',
+        subtitle: 'Bạn gõ Tiếng Việt → Cô ấy nhận Tiếng Anh chuẩn xác ngay lập tức, và ngược lại.',
+        lblName: 'Tên hiển thị của bạn',
+        namePlaceholder: 'Ví dụ: Huy',
+        defaultName: 'Huy 🇻🇳',
+        lblPin: '🔒 Mã khóa phòng bí mật (Room PIN)',
+        pinPlaceholder: 'Nhập mã bí mật chung của 2 người (VD: huy2026)',
+        securityHtml: '<strong>Bảo mật P2P 100%:</strong> Chỉ ai có đúng Mã khóa phòng này mới kết nối được. Tin nhắn truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người (1 VN - 1 EN).',
+        btnJoin: 'Vào Phòng Chat →',
+        roomTitle: '🇻🇳 ⇄ 🇬🇧 Phòng Chat Riêng',
+        statusInit: 'Đang khởi tạo kênh bảo mật...',
+        statusWaiting: 'Đang chờ người bạn mở link kết nối...',
+        statusConnected: '🟢 Đã kết nối trực tiếp!',
+        statusConnectedWith: (name) => `🟢 Đang trò chuyện cùng ${name} 🇬🇧`,
+        statusDisconnected: '🟡 Người bạn đã tạm thoát. Đang chờ kết nối lại...',
+        joinedBanner: (name) => `🎉 ${name} đã vào phòng chat!`,
+        welcomeBanner: '🔒 Kết nối P2P đã bật. Bạn gõ Tiếng Việt, bên kia sẽ thấy Tiếng Anh tự động!',
+        typingText: (name) => `${name} đang gõ tiếng Anh...`,
+        inputPlaceholder: 'Nhập tiếng Việt tại đây... (Tự dịch sang tiếng Anh)',
+        btnSend: 'Gửi',
+        btnInvite: '🔗 Copy Link gửi bạn',
+        btnAiEngine: '✨ AI Engine',
+        translatedToPeer: (flag, text) => `Đã dịch sang ${flag}: ${text}`,
+        originalFromPeer: (flag, text) => `Bản gốc ${flag}: ${text}`,
+        ttsTitle: 'Nghe phát âm',
+        pinAlert: 'Vui lòng nhập Mã khóa phòng ít nhất 4 ký tự!',
+        roomLockedAlert: 'Phòng này đã đủ 2 người và đang khóa bảo mật!',
+        dupRoleAlert: 'Vai trò này đang được mở ở 1 tab khác! Vui lòng đóng tab cũ hoặc đổi vai trò.',
+        toastCopied: '✅ Đã copy link mời! Hãy gửi link này cho bạn của bạn.',
+        toastAiOn: '✨ Đã bật dịch thuật Gemini AI!',
+        toastAiOff: 'Đã chuyển về Google Neural Translate miễn phí!',
+        modalTitle: '✨ Bộ máy Phiên dịch (Translation Engine)',
+        modalDesc: 'Mặc định ứng dụng dùng <strong>Google Neural Translate miễn phí 100%</strong>. Nếu muốn dịch sắc thái tự nhiên hơn bằng <strong>Gemini AI</strong>, bạn có thể dán API Key vào dưới đây:',
+        modalKeyLabel: 'Gemini API Key (Tùy chọn - Để trống vẫn dịch tự động miễn phí)',
+        modalCloseBtn: 'Đóng',
+        modalSaveBtn: 'Lưu cấu hình'
+      }
+    };
+
+    // State: Default to 'en' so when she clicks the public link, EVERYTHING is 100% in English immediately!
+    let myRole = 'en';
+    let myName = '';
+    let roomPin = 'huy2026';
+    let peer = null;
+    let activeConn = null;
+    let reconnectTimer = null;
+    let typingTimeout = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem('vn_en_gemini_key') || '';
+      document.getElementById('geminiKeyInput').value = savedKey;
+
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const urlPin = params.get('pin');
+      const urlRole = params.get('role');
+
+      if (urlPin) {
+        document.getElementById('inputPin').value = urlPin;
+      }
+
+      // If opened locally from file:// on Huy's PC without role=en, or if role=vn is specified -> switch to Vietnamese for Huy
+      // If opened via the public web link -> defaults to 100% English ('en') for her!
+      if (urlRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
+        selectRole('vn');
+        document.getElementById('inputName').value = 'Huy';
+      } else {
+        selectRole('en');
+      }
+    });
+
+    function selectRole(role) {
+      myRole = role;
+      const t = I18N[role];
+      document.documentElement.lang = role === 'en' ? 'en' : 'vi';
+
+      document.getElementById('roleEN').className = role === 'en' ? 'role-card active-en' : 'role-card';
+      document.getElementById('roleVN').className = role === 'vn' ? 'role-card active-vn' : 'role-card';
+
+      document.getElementById('flagsBadge').textContent = t.badge;
+      document.getElementById('uiTitle').textContent = t.title;
+      document.getElementById('uiSubtitle').textContent = t.subtitle;
+      document.getElementById('lblName').textContent = t.lblName;
+      document.getElementById('inputName').placeholder = t.namePlaceholder;
+      document.getElementById('lblPin').textContent = t.lblPin;
+      document.getElementById('inputPin').placeholder = t.pinPlaceholder;
+      document.getElementById('uiSecurityText').innerHTML = t.securityHtml;
+      document.getElementById('btnJoin').textContent = t.btnJoin;
+
+      document.getElementById('roomTitle').textContent = t.roomTitle;
+      document.getElementById('peerStatus').textContent = t.statusWaiting;
+      document.getElementById('welcomeBanner').textContent = t.welcomeBanner;
+      document.getElementById('msgInput').placeholder = t.inputPlaceholder;
+      document.getElementById('lblSend').textContent = t.btnSend;
+      document.getElementById('btnInvite').textContent = t.btnInvite;
+      document.getElementById('btnAiEngine').textContent = t.btnAiEngine;
+
+      document.getElementById('modalTitle').textContent = t.modalTitle;
+      document.getElementById('modalDesc').innerHTML = t.modalDesc;
+      document.getElementById('modalKeyLabel').textContent = t.modalKeyLabel;
+      document.getElementById('modalCloseBtn').textContent = t.modalCloseBtn;
+      document.getElementById('modalSaveBtn').textContent = t.modalSaveBtn;
+    }
+
+    async function sha256Short(str) {
+      const buf = new TextEncoder().encode('vnen-bridge-2026-' + str.trim().toLowerCase());
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 20);
+    }
+
+    async function joinPrivateRoom() {
+      const t = I18N[myRole];
+      const nameVal = document.getElementById('inputName').value.trim();
+      const pinVal = document.getElementById('inputPin').value.trim();
+
+      if (!pinVal || pinVal.length < 4) {
+        alert(t.pinAlert);
+        return;
+      }
+
+      myName = nameVal || t.defaultName;
+      roomPin = pinVal;
+
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('chatScreen').style.display = 'flex';
+      document.getElementById('welcomeBanner').textContent = t.welcomeBanner;
+
+      const roomHash = await sha256Short(roomPin);
+      const myPeerId = `vnen-${roomHash}-${myRole}`;
+      const targetPeerId = `vnen-${roomHash}-${myRole === 'vn' ? 'en' : 'vn'}`;
+
+      initPeerConnection(myPeerId, targetPeerId);
+    }
+
+    function initPeerConnection(myPeerId, targetPeerId) {
+      const t = I18N[myRole];
+      updateStatus(false, t.statusInit);
+
+      peer = new Peer(myPeerId, { debug: 1 });
+
+      peer.on('open', () => {
+        updateStatus(false, I18N[myRole].statusWaiting);
+        connectToTarget(targetPeerId);
+
+        reconnectTimer = setInterval(() => {
+          if (!activeConn || !activeConn.open) {
+            connectToTarget(targetPeerId);
+          }
+        }, 3500);
+      });
+
+      peer.on('connection', (conn) => {
+        if (activeConn && activeConn.open) {
+          conn.on('open', () => {
+            conn.send({ type: 'ROOM_LOCKED' });
+            setTimeout(() => conn.close(), 500);
+          });
+          return;
+        }
+        setupConnectionHandlers(conn);
+      });
+
+      peer.on('error', (err) => {
+        if (err.type === 'unavailable-id') {
+          alert(I18N[myRole].dupRoleAlert);
+        }
+      });
+    }
+
+    function connectToTarget(targetPeerId) {
+      if (activeConn && activeConn.open) return;
+      const conn = peer.connect(targetPeerId, { reliable: true });
+      setupConnectionHandlers(conn);
+    }
+
+    function setupConnectionHandlers(conn) {
+      conn.on('open', () => {
+        activeConn = conn;
+        conn.send({
+          type: 'HELLO',
+          name: myName,
+          role: myRole
+        });
+        updateStatus(true, I18N[myRole].statusConnected);
+      });
+
+      conn.on('data', (data) => {
+        if (!data || typeof data !== 'object') return;
+        const t = I18N[myRole];
+
+        if (data.type === 'ROOM_LOCKED') {
+          alert(t.roomLockedAlert);
+          return;
+        }
+
+        if (data.type === 'HELLO') {
+          updateStatus(true, t.statusConnectedWith(data.name));
+          addSystemMessage(t.joinedBanner(data.name));
+        }
+
+        if (data.type === 'TYPING') {
+          const ind = document.getElementById('typingIndicator');
+          ind.textContent = t.typingText(data.name);
+          clearTimeout(typingTimeout);
+          typingTimeout = setTimeout(() => { ind.textContent = ''; }, 2500);
+        }
+
+        if (data.type === 'CHAT') {
+          document.getElementById('typingIndicator').textContent = '';
+          renderMessage({
+            senderName: data.senderName,
+            senderRole: data.senderRole,
+            originalText: data.originalText,
+            translatedText: data.translatedText,
+            time: data.time,
+            isMine: false
+          });
+        }
+      });
+
+      conn.on('close', () => {
+        activeConn = null;
+        updateStatus(false, I18N[myRole].statusDisconnected);
+      });
+    }
+
+    function updateStatus(isOnline, text) {
+      const dot = document.getElementById('statusDot');
+      dot.className = isOnline ? 'status-dot online' : 'status-dot';
+      document.getElementById('peerStatus').textContent = text;
+    }
+
+    function addSystemMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'system-banner';
+      div.textContent = text;
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('msgInput');
+      input.addEventListener('input', () => {
+        if (activeConn && activeConn.open) {
+          activeConn.send({ type: 'TYPING', name: myName });
+        }
+      });
+    });
+
+    async function translateText(text, fromLang, toLang) {
+      const geminiKey = (localStorage.getItem('vn_en_gemini_key') || '').trim();
+
+      if (geminiKey) {
+        try {
+          const langNames = { vi: 'Vietnamese', en: 'English (warm, natural, friendly conversational tone)' };
+          const prompt = `You are an expert bilingual interpreter between a Vietnamese person and an English-speaking friend. Translate the following ${langNames[fromLang]} message into natural, conversational ${langNames[toLang]}. Output ONLY the translated text without quotes or explanations:\n\n${text}`;
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+          if (res.ok) {
+            const json = await res.json();
+            const out = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (out) return out;
+          }
+        } catch (e) {
+          console.warn('Gemini fallback to Google Neural Translate:', e);
+        }
+      }
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (Array.isArray(data) && Array.isArray(data[0])) {
+          return data[0].map(segment => segment[0]).join('');
+        }
+      } catch (err) {
+        console.error('Translation error:', err);
+      }
+      return text;
+    }
+
+    async function handleSendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      const btnSend = document.getElementById('btnSend');
+      btnSend.disabled = true;
+
+      const fromLang = myRole === 'vn' ? 'vi' : 'en';
+      const toLang = myRole === 'vn' ? 'en' : 'vi';
+
+      const translatedText = await translateText(text, fromLang, toLang);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const payload = {
+        type: 'CHAT',
+        senderName: myName,
+        senderRole: myRole,
+        originalText: text,
+        translatedText: translatedText,
+        time: timeStr
+      };
+
+      renderMessage({
+        ...payload,
+        isMine: true
+      });
+
+      if (activeConn && activeConn.open) {
+        activeConn.send(payload);
+      }
+
+      btnSend.disabled = false;
+      input.focus();
+    }
+
+    function renderMessage({ senderName, senderRole, originalText, translatedText, time, isMine }) {
+      const t = I18N[myRole];
+      const area = document.getElementById('messagesArea');
+      const row = document.createElement('div');
+      row.className = `msg-row ${isMine ? 'mine' : 'theirs'}`;
+
+      const flag = senderRole === 'vn' ? '🇻🇳' : '🇬🇧';
+      const targetFlag = senderRole === 'vn' ? '🇬🇧' : '🇻🇳';
+      const targetLangCode = senderRole === 'vn' ? 'en-US' : 'vi-VN';
+
+      const mainDisplay = isMine ? `${flag} ${originalText}` : `${targetFlag} ${translatedText}`;
+      const subDisplay = isMine
+        ? t.translatedToPeer(targetFlag, translatedText)
+        : t.originalFromPeer(flag, originalText);
+
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+      meta.textContent = `${flag} ${senderName} • ${time}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+
+      const primaryDiv = document.createElement('div');
+      primaryDiv.className = 'primary-text';
+      primaryDiv.textContent = mainDisplay;
+
+      const secondaryDiv = document.createElement('div');
+      secondaryDiv.className = 'secondary-text';
+
+      const subSpan = document.createElement('span');
+      subSpan.textContent = subDisplay;
+
+      const ttsBtn = document.createElement('button');
+      ttsBtn.className = 'tts-btn';
+      ttsBtn.title = t.ttsTitle;
+      ttsBtn.textContent = '🔊';
+      ttsBtn.onclick = () => speakUtterance(translatedText, targetLangCode);
+
+      secondaryDiv.appendChild(subSpan);
+      secondaryDiv.appendChild(ttsBtn);
+
+      bubble.appendChild(primaryDiv);
+      bubble.appendChild(secondaryDiv);
+
+      row.appendChild(meta);
+      row.appendChild(bubble);
+      area.appendChild(row);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function speakUtterance(text, lang) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    }
+
+    function copyInviteLink() {
+      const partnerRole = myRole === 'vn' ? 'en' : 'vn';
+      const baseUrl = window.location.origin + window.location.pathname + window.location.search;
+      const inviteUrl = `${baseUrl}#pin=${encodeURIComponent(roomPin)}&role=${partnerRole}`;
+
+      navigator.clipboard.writeText(inviteUrl).then(() => {
+        showToast(I18N[myRole].toastCopied);
+      });
+    }
+
+    function toggleAiModal() {
+      const m = document.getElementById('aiModal');
+      m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function saveAiKey() {
+      const val = document.getElementById('geminiKeyInput').value.trim();
+      localStorage.setItem('vn_en_gemini_key', val);
+      toggleAiModal();
+      showToast(val ? I18N[myRole].toastAiOn : I18N[myRole].toastAiOff);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3200);
+    }
+  </script>
+</body>
+</html>
