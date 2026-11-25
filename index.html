@@ -964,9 +964,9 @@
       const params = new URLSearchParams(hash);
       const urlPin = params.get('pin');
       const urlRole = params.get('role');
-      const savedRole = sessionStorage.getItem('cat_chat_role');
-      const savedName = sessionStorage.getItem('cat_chat_name');
-      const savedPin = sessionStorage.getItem('cat_chat_pin');
+      const savedRole = localStorage.getItem('cat_chat_role');
+      const savedName = localStorage.getItem('cat_chat_name');
+      const savedPin = localStorage.getItem('cat_chat_pin');
 
       if (urlPin) {
         document.getElementById('inputPin').value = urlPin;
@@ -982,8 +982,15 @@
         if (savedName) document.getElementById('inputName').value = savedName;
       }
 
+      // Cleanly release PeerJS ID immediately when refreshing (F5) so new page never gets blocked!
+      window.addEventListener('beforeunload', () => {
+        if (peer && !peer.destroyed) {
+          try { peer.destroy(); } catch (e) {}
+        }
+      });
+
       // Auto-rejoin if user just refreshed (F5) while already in room!
-      if (sessionStorage.getItem('cat_chat_joined') === '1') {
+      if (localStorage.getItem('cat_chat_joined') === '1') {
         joinPrivateRoom();
       }
 
@@ -1041,10 +1048,10 @@
       myName = nameVal || t.defaultName;
       roomPin = pinVal;
 
-      sessionStorage.setItem('cat_chat_role', myRole);
-      sessionStorage.setItem('cat_chat_name', myName);
-      sessionStorage.setItem('cat_chat_pin', roomPin);
-      sessionStorage.setItem('cat_chat_joined', '1');
+      localStorage.setItem('cat_chat_role', myRole);
+      localStorage.setItem('cat_chat_name', myName);
+      localStorage.setItem('cat_chat_pin', roomPin);
+      localStorage.setItem('cat_chat_joined', '1');
 
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('chatScreen').style.display = 'flex';
@@ -1055,7 +1062,7 @@
     }
 
     function leaveRoom() {
-      sessionStorage.removeItem('cat_chat_joined');
+      localStorage.removeItem('cat_chat_joined');
       if (reconnectTimer) clearInterval(reconnectTimer);
       if (peer) peer.destroy();
       connections = [];
@@ -1263,17 +1270,19 @@
     function saveMessageToHistory(msgObj) {
       try {
         const key = 'cat_history_' + roomPin;
-        const list = JSON.parse(sessionStorage.getItem(key) || '[]');
-        list.push(msgObj);
-        if (list.length > 40) list.shift();
-        sessionStorage.setItem(key, JSON.stringify(list));
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        if (!list.some(item => item.msgId === msgObj.msgId)) {
+          list.push(msgObj);
+          if (list.length > 50) list.shift();
+          localStorage.setItem(key, JSON.stringify(list));
+        }
       } catch (e) {}
     }
 
     function restoreHistory() {
       try {
         const key = 'cat_history_' + roomPin;
-        const list = JSON.parse(sessionStorage.getItem(key) || '[]');
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
         list.forEach(async (m) => {
           if (!renderedMsgIds.has(m.msgId)) {
             // Re-translate any past message that was stuck untranslated!
