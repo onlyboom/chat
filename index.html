@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>🇬🇧 Private Translation Chat ⇄ 🇻🇳 Phòng Chat Phiên Dịch</title>
+  <title>🐱 Private Translation Chat ⇄ Phòng Chat Phiên Dịch</title>
   <!-- PeerJS for Serverless Direct Encrypted WebRTC P2P -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
-      --card-bg: rgba(30, 41, 59, 0.78);
-      --card-border: rgba(255, 255, 255, 0.12);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-vn: #ef4444;
-      --accent-en: #3b82f6;
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --my-bubble: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-      --peer-bubble: rgba(51, 65, 85, 0.85);
-      --success: #22c55e;
-      --warning: #eab308;
+      --bg-gradient: linear-gradient(135deg, #2e1065 0%, #4c1d95 45%, #831843 100%);
+      --card-bg: rgba(24, 20, 44, 0.88);
+      --card-border: rgba(255, 192, 229, 0.25);
+      --text-main: #ffffff;
+      --text-muted: #f1d5e8;
+      --accent-vn: #fb7185;
+      --accent-en: #60a5fa;
+      --primary: #ec4899;
+      --primary-hover: #db2777;
+      --my-bubble: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+      --peer-bubble: rgba(39, 32, 68, 0.96);
+      --success: #4ade80;
+      --warning: #facc15;
     }
 
     * {
@@ -41,55 +41,106 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
+    }
+
+    /* Cute Floating Paw Prints & Cat Ears Background Layer */
+    .cute-bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(244, 114, 182, 0.16) 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(167, 139, 250, 0.18) 0%, transparent 40%);
+    }
+
+    .floating-cat-bg {
+      position: fixed;
+      bottom: 12px;
+      right: 18px;
+      width: 170px;
+      height: 170px;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.92;
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+      animation: catBob 4s ease-in-out infinite;
+    }
+
+    @media (max-width: 960px) {
+      .floating-cat-bg {
+        display: none;
+      }
+    }
+
+    @keyframes catBob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
     }
 
     /* Setup / Login Screen */
     .login-container {
+      position: relative;
+      z-index: 2;
       width: 92%;
-      max-width: 440px;
+      max-width: 455px;
       background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 2px solid var(--card-border);
+      border-radius: 28px;
       padding: 32px 28px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.65);
       animation: fadeIn 0.35s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .brand-header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
+    }
+
+    .cute-cat-avatar {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(236, 72, 153, 0.35));
     }
 
     .flags-badge {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: rgba(255, 255, 255, 0.07);
-      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 7px 18px;
       border-radius: 999px;
-      font-size: 1.25rem;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
     }
 
     .brand-header h1 {
-      font-size: 1.35rem;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1.45rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
       margin-bottom: 6px;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     }
 
     .brand-header p {
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .role-selector {
@@ -100,10 +151,10 @@
     }
 
     .role-card {
-      background: rgba(15, 23, 42, 0.55);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 16px 12px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 15px 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -111,38 +162,39 @@
     }
 
     .role-card:hover {
-      border-color: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.38);
       transform: translateY(-2px);
     }
 
     .role-card.active-vn {
-      border-color: #ef4444;
-      background: rgba(239, 68, 68, 0.15);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+      border-color: #fb7185;
+      background: rgba(244, 63, 94, 0.24);
+      box-shadow: 0 0 22px rgba(244, 63, 94, 0.3);
     }
 
     .role-card.active-en {
-      border-color: #3b82f6;
-      background: rgba(59, 130, 246, 0.15);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+      border-color: #60a5fa;
+      background: rgba(59, 130, 246, 0.24);
+      box-shadow: 0 0 22px rgba(59, 130, 246, 0.3);
     }
 
     .role-flag {
-      font-size: 2rem;
-      margin-bottom: 6px;
+      font-size: 2.05rem;
+      margin-bottom: 5px;
       display: block;
     }
 
     .role-title {
-      font-weight: 600;
-      font-size: 0.92rem;
+      font-weight: 700;
+      font-size: 0.98rem;
       display: block;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
+      color: #ffffff;
     }
 
     .role-sub {
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      font-size: 0.8rem;
+      color: #e2e8f0;
     }
 
     .form-group {
@@ -152,40 +204,42 @@
     .form-group label {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
+      font-size: 0.88rem;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #fce7f3;
       margin-bottom: 6px;
     }
 
     .input-box {
       width: 100%;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      background: rgba(15, 18, 38, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 13px 15px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 500;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .input-box:focus {
-      border-color: var(--primary);
+      border-color: #f472b6;
+      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
     }
 
     .security-note {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-size: 0.76rem;
-      color: #bbf7d0;
+      gap: 9px;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(74, 222, 128, 0.35);
+      padding: 11px 13px;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      color: #dcfce7;
       margin-bottom: 18px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .btn-primary {
@@ -193,16 +247,17 @@
       background: var(--my-bubble);
       color: #fff;
       border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 0.98rem;
-      font-weight: 600;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
       cursor: pointer;
+      box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.5);
       transition: opacity 0.2s, transform 0.1s;
     }
 
     .btn-primary:hover {
-      opacity: 0.95;
+      opacity: 0.96;
     }
 
     .btn-primary:active {
@@ -211,35 +266,39 @@
 
     /* Main Chat Screen */
     .chat-container {
+      position: relative;
+      z-index: 2;
       display: none;
       flex-direction: column;
       width: 100%;
-      max-width: 780px;
+      max-width: 820px;
       height: 100dvh;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(20px);
+      background: rgba(20, 16, 38, 0.86);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
       border-left: 1px solid var(--card-border);
       border-right: 1px solid var(--card-border);
     }
 
-    @media (min-width: 780px) {
+    @media (min-width: 820px) {
       .chat-container {
-        height: 92dvh;
-        border-radius: 24px;
-        border: 1px solid var(--card-border);
+        height: 93dvh;
+        border-radius: 28px;
+        border: 2px solid var(--card-border);
         overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+        box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7);
       }
     }
 
     .chat-header {
       padding: 14px 18px;
-      background: rgba(30, 41, 59, 0.85);
+      background: rgba(36, 25, 64, 0.95);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      z-index: 3;
     }
 
     .header-left {
@@ -248,13 +307,21 @@
       gap: 12px;
     }
 
+    .header-cat-icon {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
     .status-dot {
-      width: 10px;
-      height: 10px;
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
       background: var(--warning);
       box-shadow: 0 0 8px var(--warning);
       transition: all 0.3s;
+      display: inline-block;
+      margin-right: 5px;
     }
 
     .status-dot.online {
@@ -263,16 +330,22 @@
     }
 
     .room-info h2 {
-      font-size: 0.98rem;
-      font-weight: 600;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1.06rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
+      color: #ffffff;
     }
 
     .room-info p {
-      font-size: 0.76rem;
-      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #fbcfe8;
+      display: flex;
+      align-items: center;
+      margin-top: 2px;
     }
 
     .header-actions {
@@ -282,50 +355,76 @@
     }
 
     .icon-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text-main);
-      padding: 7px 11px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 500;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      padding: 8px 13px;
+      border-radius: 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
 
     .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.22);
     }
 
+    /* Chat Messages Area with Cute Cat Wallpaper Watermark */
     .messages-area {
+      position: relative;
       flex: 1;
       overflow-y: auto;
-      padding: 20px 18px;
+      padding: 22px 18px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
       scroll-behavior: smooth;
     }
 
-    .system-banner {
+    /* Cute Cat Center Wallpaper inside Chat */
+    .cat-wallpaper {
+      position: sticky;
+      top: 22%;
       align-self: center;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      padding: 8px 16px;
+      pointer-events: none;
+      opacity: 0.16;
+      z-index: 0;
+      text-align: center;
+      margin-bottom: -170px;
+      user-select: none;
+    }
+
+    .cat-wallpaper svg {
+      width: 165px;
+      height: 165px;
+    }
+
+    .system-banner {
+      position: relative;
+      z-index: 1;
+      align-self: center;
+      background: rgba(244, 114, 182, 0.15);
+      border: 1px solid rgba(244, 114, 182, 0.35);
+      color: #fce7f3;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 9px 18px;
       border-radius: 999px;
       text-align: center;
-      max-width: 90%;
+      max-width: 92%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .msg-row {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
-      max-width: 82%;
+      max-width: 84%;
       animation: fadeIn 0.2s ease;
     }
 
@@ -340,120 +439,204 @@
     }
 
     .msg-meta {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-      padding: 0 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #f9a8d4;
+      margin-bottom: 5px;
+      padding: 0 5px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
+    /* High-contrast, ultra-clear typography inside bubbles */
     .msg-bubble {
-      padding: 12px 15px;
-      border-radius: 18px;
+      padding: 14px 17px;
+      border-radius: 20px;
       position: relative;
-      line-height: 1.45;
+      line-height: 1.5;
       word-break: break-word;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
     }
 
     .msg-row.mine .msg-bubble {
       background: var(--my-bubble);
-      border-bottom-right-radius: 4px;
-      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-bottom-right-radius: 5px;
+      color: #ffffff;
     }
 
     .msg-row.theirs .msg-bubble {
       background: var(--peer-bubble);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom-left-radius: 4px;
-      color: #f8fafc;
+      border: 1.5px solid rgba(244, 114, 182, 0.32);
+      border-bottom-left-radius: 5px;
+      color: #ffffff;
     }
 
     .primary-text {
-      font-size: 1rem;
-      font-weight: 500;
-      margin-bottom: 6px;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      margin-bottom: 8px;
     }
 
     .secondary-text {
-      font-size: 0.82rem;
-      opacity: 0.78;
-      padding-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.94rem;
+      font-weight: 500;
+      color: #fef08a;
+      background: rgba(0, 0, 0, 0.24);
+      padding: 7px 11px;
+      border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
     }
 
+    .msg-row.theirs .secondary-text {
+      color: #fbcfe8;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Image message styling */
+    .chat-image-wrap {
+      margin-bottom: 8px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.3);
+      max-width: 310px;
+    }
+
+    .chat-image {
+      display: block;
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      cursor: zoom-in;
+      transition: transform 0.2s ease;
+    }
+
+    .chat-image:hover {
+      transform: scale(1.02);
+    }
+
     .tts-btn {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.22);
       border: none;
       color: #fff;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       flex-shrink: 0;
       transition: transform 0.15s, background 0.15s;
     }
 
     .tts-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.08);
+      background: rgba(255, 255, 255, 0.38);
+      transform: scale(1.1);
+    }
+
+    /* Read Receipt ("Seen / Đã xem") */
+    .msg-status {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-top: 4px;
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .msg-status.seen {
+      color: #4ade80;
+      text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
     }
 
     .typing-indicator {
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      padding: 0 20px 6px;
-      min-height: 22px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #f9a8d4;
+      padding: 0 22px 6px;
+      min-height: 24px;
       font-style: italic;
     }
 
     .chat-input-bar {
-      padding: 14px 16px;
-      background: rgba(30, 41, 59, 0.9);
+      padding: 13px 16px;
+      background: rgba(36, 25, 64, 0.96);
       border-top: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       gap: 10px;
+      z-index: 3;
+    }
+
+    .upload-btn {
+      background: rgba(244, 114, 182, 0.2);
+      border: 1.5px solid rgba(244, 114, 182, 0.45);
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .upload-btn:hover {
+      background: rgba(244, 114, 182, 0.38);
+      transform: scale(1.06);
     }
 
     .chat-input {
       flex: 1;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 13px 16px;
+      background: rgba(15, 18, 38, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      color: #ffffff;
+      padding: 13px 18px;
       border-radius: 999px;
-      font-size: 0.95rem;
+      font-size: 1.02rem;
+      font-weight: 500;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .chat-input::placeholder {
+      color: #cbd5e1;
     }
 
     .chat-input:focus {
-      border-color: var(--primary);
+      border-color: #f472b6;
+      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
     }
 
     .send-btn {
       background: var(--my-bubble);
       color: #fff;
       border: none;
-      padding: 13px 20px;
+      padding: 13px 22px;
       border-radius: 999px;
-      font-weight: 600;
-      font-size: 0.92rem;
+      font-weight: 700;
+      font-size: 0.98rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(219, 39, 119, 0.45);
     }
 
     .send-btn:disabled {
@@ -461,12 +644,33 @@
       cursor: not-allowed;
     }
 
+    /* Fullscreen Image Lightbox */
+    .lightbox-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+
+    .lightbox-backdrop img {
+      max-width: 95%;
+      max-height: 92dvh;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
     /* Modal for AI API Key Optional Upgrade */
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(6px);
       z-index: 100;
       align-items: center;
@@ -475,21 +679,22 @@
     }
 
     .modal-card {
-      background: #1e293b;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      max-width: 420px;
+      background: #241940;
+      border: 1.5px solid rgba(244, 114, 182, 0.35);
+      border-radius: 22px;
+      max-width: 430px;
       width: 100%;
       padding: 24px;
     }
 
     .modal-card h3 {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       margin-bottom: 8px;
+      color: #fff;
     }
 
     .modal-card p {
-      font-size: 0.82rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
       margin-bottom: 14px;
       line-height: 1.45;
@@ -497,16 +702,16 @@
 
     .toast {
       position: fixed;
-      bottom: 85px;
+      bottom: 88px;
       left: 50%;
       transform: translateX(-50%);
       background: #10b981;
       color: #fff;
-      padding: 10px 18px;
+      padding: 11px 20px;
       border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.45);
       display: none;
       z-index: 200;
     }
@@ -514,11 +719,68 @@
 </head>
 <body>
 
+  <!-- Cute Decorative Background & Corner Kawaii Cat -->
+  <div class="cute-bg-decor"></div>
+  <div class="floating-cat-bg" aria-hidden="true">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cute Chibi White & Pink Cat with Heart -->
+      <ellipse cx="100" cy="175" rx="60" ry="12" fill="rgba(0,0,0,0.25)"/>
+      <!-- Tail -->
+      <path d="M145 145 Q180 130 170 100 Q162 85 152 105 Q158 125 140 135" fill="#fff1f2" stroke="#f472b6" stroke-width="4" stroke-linecap="round"/>
+      <!-- Body -->
+      <ellipse cx="100" cy="138" rx="46" ry="36" fill="#fff1f2" stroke="#f472b6" stroke-width="4"/>
+      <!-- Ears -->
+      <polygon points="52,85 45,35 85,60" fill="#fff1f2" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+      <polygon points="56,78 52,46 78,63" fill="#fbcfe8"/>
+      <polygon points="148,85 155,35 115,60" fill="#fff1f2" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+      <polygon points="144,78 148,46 122,63" fill="#fbcfe8"/>
+      <!-- Head -->
+      <ellipse cx="100" cy="88" rx="54" ry="44" fill="#fff1f2" stroke="#f472b6" stroke-width="4"/>
+      <!-- Blush cheeks -->
+      <ellipse cx="64" cy="96" rx="10" ry="6" fill="#f472b6" opacity="0.55"/>
+      <ellipse cx="136" cy="96" rx="10" ry="6" fill="#f472b6" opacity="0.55"/>
+      <!-- Big sparkling eyes -->
+      <circle cx="76" cy="84" r="8" fill="#1e1b4b"/>
+      <circle cx="73" cy="81" r="3" fill="#ffffff"/>
+      <circle cx="124" cy="84" r="8" fill="#1e1b4b"/>
+      <circle cx="121" cy="81" r="3" fill="#ffffff"/>
+      <!-- Cute nose & W mouth -->
+      <polygon points="97,92 103,92 100,96" fill="#ec4899"/>
+      <path d="M92,99 Q96,104 100,98 Q104,104 108,99" fill="none" stroke="#1e1b4b" stroke-width="3" stroke-linecap="round"/>
+      <!-- Whiskers -->
+      <line x1="36" y1="86" x2="54" y2="89" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+      <line x1="34" y1="96" x2="53" y2="96" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+      <line x1="164" y1="86" x2="146" y2="89" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+      <line x1="166" y1="96" x2="147" y2="96" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+      <!-- Floating Pink Heart -->
+      <path d="M100 138 C100 138 82 124 82 114 C82 107 88 103 94 106 C98 108 100 112 100 112 C100 112 102 108 106 106 C112 103 118 107 118 114 C118 124 100 138 100 138 Z" fill="#ec4899"/>
+      <!-- Paws holding heart -->
+      <circle cx="82" cy="124" r="9" fill="#fff1f2" stroke="#f472b6" stroke-width="3"/>
+      <circle cx="118" cy="124" r="9" fill="#fff1f2" stroke="#f472b6" stroke-width="3"/>
+    </svg>
+  </div>
+
   <!-- 1. LOGIN / SETUP SCREEN -->
   <div class="login-container" id="loginScreen">
     <div class="brand-header">
+      <!-- Cute Cat Avatar on Login -->
+      <svg class="cute-cat-avatar" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="24,52 18,16 48,34" fill="#fff1f2" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+        <polygon points="27,47 23,24 44,36" fill="#fbcfe8"/>
+        <polygon points="96,52 102,16 72,34" fill="#fff1f2" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+        <polygon points="93,47 97,24 76,36" fill="#fbcfe8"/>
+        <ellipse cx="60" cy="64" rx="42" ry="35" fill="#fff1f2" stroke="#f472b6" stroke-width="4"/>
+        <ellipse cx="34" cy="70" rx="7" ry="4.5" fill="#f472b6" opacity="0.6"/>
+        <ellipse cx="86" cy="70" rx="7" ry="4.5" fill="#f472b6" opacity="0.6"/>
+        <circle cx="43" cy="60" r="6.5" fill="#1e1b4b"/>
+        <circle cx="41" cy="58" r="2.3" fill="#fff"/>
+        <circle cx="77" cy="60" r="6.5" fill="#1e1b4b"/>
+        <circle cx="75" cy="58" r="2.3" fill="#fff"/>
+        <polygon points="57,67 63,67 60,71" fill="#ec4899"/>
+        <path d="M53,73 Q56.5,78 60,72 Q63.5,78 67,73" fill="none" stroke="#1e1b4b" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>
       <div class="flags-badge" id="flagsBadge">🇬🇧 English ⇄ Vietnamese 🇻🇳</div>
-      <h1 id="uiTitle">Private Translation Chat (EN ⇄ VN)</h1>
+      <h1 id="uiTitle">Cute Cat Translation Chat 🐾</h1>
       <p id="uiSubtitle">Type in English → He receives it instantly in Vietnamese, and vice versa in real-time!</p>
     </div>
 
@@ -550,12 +812,12 @@
     </div>
 
     <div class="security-note" id="uiSecurityNote">
-      <span>🛡️</span>
-      <span id="uiSecurityText"><strong>100% Private P2P Connection:</strong> Only someone with this secret room code can join. Messages are sent directly between your two browsers (max 2 people).</span>
+      <span>🐾</span>
+      <span id="uiSecurityText"><strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).</span>
     </div>
 
     <button class="btn-primary" id="btnJoin" onclick="joinPrivateRoom()">
-      Start Private Chat →
+      Start Private Chat 🐾 →
     </button>
   </div>
 
@@ -563,15 +825,23 @@
   <div class="chat-container" id="chatScreen">
     <div class="chat-header">
       <div class="header-left">
-        <div class="status-dot" id="statusDot"></div>
+        <svg class="header-cat-icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="24,52 18,16 48,34" fill="#fff1f2" stroke="#f472b6" stroke-width="5" stroke-linejoin="round"/>
+          <polygon points="96,52 102,16 72,34" fill="#fff1f2" stroke="#f472b6" stroke-width="5" stroke-linejoin="round"/>
+          <ellipse cx="60" cy="64" rx="42" ry="35" fill="#fff1f2" stroke="#f472b6" stroke-width="5"/>
+          <circle cx="43" cy="60" r="6.5" fill="#1e1b4b"/>
+          <circle cx="77" cy="60" r="6.5" fill="#1e1b4b"/>
+          <polygon points="57,67 63,67 60,71" fill="#ec4899"/>
+          <path d="M53,73 Q56.5,78 60,72 Q63.5,78 67,73" fill="none" stroke="#1e1b4b" stroke-width="3" stroke-linecap="round"/>
+        </svg>
         <div class="room-info">
-          <h2 id="roomTitle">🇬🇧 ⇄ 🇻🇳 Private Translation Chat</h2>
-          <p id="peerStatus">Waiting for connection with Vietnam...</p>
+          <h2 id="roomTitle">🐱 Private Translation Chat</h2>
+          <p><span class="status-dot" id="statusDot"></span><span id="peerStatus">Waiting for connection...</span></p>
         </div>
       </div>
       <div class="header-actions">
         <button class="icon-btn" onclick="copyInviteLink()" id="btnInvite" title="Copy Invite Link">
-          🔗 Copy Invite Link
+          🔗 Copy Link
         </button>
         <button class="icon-btn" onclick="toggleAiModal()" id="btnAiEngine" title="AI Translation Settings">
           ✨ AI Engine
@@ -580,14 +850,32 @@
     </div>
 
     <div class="messages-area" id="messagesArea">
+      <!-- Cute Cat Watermark inside chat background -->
+      <div class="cat-wallpaper" aria-hidden="true">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="52,85 45,35 85,60" fill="#fff" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="148,85 155,35 115,60" fill="#fff" stroke="#f472b6" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse cx="100" cy="95" rx="55" ry="45" fill="#fff" stroke="#f472b6" stroke-width="4"/>
+          <circle cx="76" cy="90" r="8" fill="#f472b6"/>
+          <circle cx="124" cy="90" r="8" fill="#f472b6"/>
+          <path d="M90,105 Q95,112 100,104 Q105,112 110,105" fill="none" stroke="#f472b6" stroke-width="4" stroke-linecap="round"/>
+          <path d="M100 165 C100 165 75 145 75 132 C75 122 84 117 92 121 C97 124 100 129 100 129 C100 129 103 124 108 121 C116 117 125 122 125 132 C125 145 100 165 100 165 Z" fill="#f472b6"/>
+        </svg>
+      </div>
+
       <div class="system-banner" id="welcomeBanner">
-        🔒 Private P2P connection active. Just type in English, it will automatically translate into Vietnamese!
+        🐾 Private P2P connection active. Type text or send photos anytime!
       </div>
     </div>
 
     <div class="typing-indicator" id="typingIndicator"></div>
 
     <form class="chat-input-bar" onsubmit="handleSendMessage(event)">
+      <!-- Hidden file input for photo upload -->
+      <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)" />
+      <button type="button" class="upload-btn" id="btnUploadImg" onclick="document.getElementById('imageInput').click()" title="Send Photo / Gửi ảnh">
+        📷
+      </button>
       <input
         type="text"
         id="msgInput"
@@ -596,12 +884,17 @@
         autocomplete="off"
       />
       <button type="submit" class="send-btn" id="btnSend">
-        <span id="lblSend">Send</span> 🚀
+        <span id="lblSend">Send</span> 🐾
       </button>
     </form>
   </div>
 
-  <!-- 3. OPTIONAL AI ENGINE MODAL -->
+  <!-- 3. FULLSCREEN IMAGE LIGHTBOX -->
+  <div class="lightbox-backdrop" id="lightbox" onclick="this.style.display='none'">
+    <img id="lightboxImg" src="" alt="Preview" />
+  </div>
+
+  <!-- 4. OPTIONAL AI ENGINE MODAL -->
   <div class="modal-backdrop" id="aiModal">
     <div class="modal-card">
       <h3 id="modalTitle">✨ Translation Engine</h3>
@@ -615,7 +908,7 @@
       </div>
       <div style="display:flex; gap:10px; justify-content:flex-end;">
         <button class="icon-btn" id="modalCloseBtn" onclick="toggleAiModal()">Close</button>
-        <button class="icon-btn" id="modalSaveBtn" style="background:#4f46e5; border-color:#6366f1;" onclick="saveAiKey()">Save</button>
+        <button class="icon-btn" id="modalSaveBtn" style="background:#db2777; border-color:#f472b6;" onclick="saveAiKey()">Save</button>
       </div>
     </div>
   </div>
@@ -623,34 +916,36 @@
   <div class="toast" id="toastMsg">Invite link copied!</div>
 
   <script>
-    // Complete Localized Dictionary (100% English for 'en', 100% Vietnamese for 'vn')
     const I18N = {
       en: {
         badge: '🇬🇧 English ⇄ Vietnamese 🇻🇳',
-        title: 'Private Translation Chat (EN ⇄ VN)',
+        title: 'Cute Cat Translation Chat 🐾',
         subtitle: 'Type in English → He receives it instantly in Vietnamese, and vice versa in real-time!',
         lblName: 'Your Name',
         namePlaceholder: 'E.g. Emma',
-        defaultName: 'Emma 🇬🇧',
+        defaultName: 'Emma 🐱',
         lblPin: '🔒 Secret Room Code (Room PIN)',
         pinPlaceholder: 'Enter your shared secret code (e.g. huy2026)',
-        securityHtml: '<strong>100% Private P2P Connection:</strong> Only someone with this secret room code can join. Messages are sent directly between your two browsers (max 2 people).',
-        btnJoin: 'Start Private Chat →',
-        roomTitle: '🇬🇧 ⇄ 🇻🇳 Private Translation Chat',
+        securityHtml: '<strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).',
+        btnJoin: 'Start Private Chat 🐾 →',
+        roomTitle: '🐱 Private Translation Chat',
         statusInit: 'Starting secure channel...',
         statusWaiting: 'Waiting for your friend in Vietnam to connect...',
         statusConnected: '🟢 Connected directly with Vietnam!',
-        statusConnectedWith: (name) => `🟢 Connected with ${name} 🇻🇳`,
+        statusConnectedWith: (name) => `🟢 Chatting with ${name} 🇻🇳`,
         statusDisconnected: '🟡 Disconnected. Waiting to reconnect...',
-        joinedBanner: (name) => `🎉 ${name} (Vietnam) is now online in the chat!`,
-        welcomeBanner: '🔒 Private P2P connection active. Just type in English, it will automatically translate into Vietnamese!',
-        typingText: (name) => `${name} is typing in Vietnamese...`,
+        joinedBanner: (name) => `🐾 ${name} (Vietnam) joined the chat!`,
+        welcomeBanner: '🐾 Private P2P connection active. Just type in English or click 📷 to send a photo!',
+        typingText: (name) => `🐱 ${name} is typing...`,
         inputPlaceholder: 'Type here in English... (Translated to Vietnamese)',
         btnSend: 'Send',
         btnInvite: '🔗 Copy Link',
         btnAiEngine: '✨ AI Engine',
+        uploadTitle: 'Send a photo',
         translatedToPeer: (flag, text) => `Translated to ${flag}: ${text}`,
         originalFromPeer: (flag, text) => `Original ${flag}: ${text}`,
+        sentText: '✓ Sent',
+        seenText: (time) => `✓✓ Seen at ${time}`,
         ttsTitle: 'Listen to pronunciation',
         pinAlert: 'Please enter a Room Code with at least 4 characters!',
         roomLockedAlert: 'This private room already has 2 people and is locked!',
@@ -666,35 +961,38 @@
       },
       vn: {
         badge: '🇻🇳 Tiếng Việt ⇄ English 🇬🇧',
-        title: 'Phòng Chat Phiên Dịch Riêng Tư',
+        title: 'Phòng Chat Mèo Con Phiên Dịch 🐾',
         subtitle: 'Bạn gõ Tiếng Việt → Cô ấy nhận Tiếng Anh chuẩn xác ngay lập tức, và ngược lại.',
         lblName: 'Tên hiển thị của bạn',
         namePlaceholder: 'Ví dụ: Huy',
-        defaultName: 'Huy 🇻🇳',
+        defaultName: 'Huy 🐱',
         lblPin: '🔒 Mã khóa phòng bí mật (Room PIN)',
         pinPlaceholder: 'Nhập mã bí mật chung của 2 người (VD: huy2026)',
-        securityHtml: '<strong>Bảo mật P2P 100%:</strong> Chỉ ai có đúng Mã khóa phòng này mới kết nối được. Tin nhắn truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người (1 VN - 1 EN).',
-        btnJoin: 'Vào Phòng Chat →',
-        roomTitle: '🇻🇳 ⇄ 🇬🇧 Phòng Chat Riêng',
+        securityHtml: '<strong>Bảo mật P2P 100%:</strong> Tin nhắn & hình ảnh truyền trực tiếp giữa 2 trình duyệt, tối đa 2 người.',
+        btnJoin: 'Vào Phòng Chat 🐾 →',
+        roomTitle: '🐱 Phòng Chat Mèo Con',
         statusInit: 'Đang khởi tạo kênh bảo mật...',
-        statusWaiting: 'Đang chờ người bạn mở link kết nối...',
+        statusWaiting: 'Đang chờ cô ấy mở link kết nối...',
         statusConnected: '🟢 Đã kết nối trực tiếp!',
         statusConnectedWith: (name) => `🟢 Đang trò chuyện cùng ${name} 🇬🇧`,
-        statusDisconnected: '🟡 Người bạn đã tạm thoát. Đang chờ kết nối lại...',
-        joinedBanner: (name) => `🎉 ${name} đã vào phòng chat!`,
-        welcomeBanner: '🔒 Kết nối P2P đã bật. Bạn gõ Tiếng Việt, bên kia sẽ thấy Tiếng Anh tự động!',
-        typingText: (name) => `${name} đang gõ tiếng Anh...`,
+        statusDisconnected: '🟡 Cô ấy đã tạm thoát. Đang chờ kết nối lại...',
+        joinedBanner: (name) => `🐾 ${name} đã vào phòng chat!`,
+        welcomeBanner: '🐾 Kết nối P2P đã bật. Bạn có thể gõ Tiếng Việt hoặc bấm 📷 để gửi ảnh!',
+        typingText: (name) => `🐱 ${name} đang gõ tin nhắn...`,
         inputPlaceholder: 'Nhập tiếng Việt tại đây... (Tự dịch sang tiếng Anh)',
         btnSend: 'Gửi',
         btnInvite: '🔗 Copy Link gửi bạn',
         btnAiEngine: '✨ AI Engine',
+        uploadTitle: 'Gửi hình ảnh',
         translatedToPeer: (flag, text) => `Đã dịch sang ${flag}: ${text}`,
         originalFromPeer: (flag, text) => `Bản gốc ${flag}: ${text}`,
+        sentText: '✓ Đã gửi',
+        seenText: (time) => `✓✓ Đã xem lúc ${time}`,
         ttsTitle: 'Nghe phát âm',
         pinAlert: 'Vui lòng nhập Mã khóa phòng ít nhất 4 ký tự!',
         roomLockedAlert: 'Phòng này đã đủ 2 người và đang khóa bảo mật!',
         dupRoleAlert: 'Vai trò này đang được mở ở 1 tab khác! Vui lòng đóng tab cũ hoặc đổi vai trò.',
-        toastCopied: '✅ Đã copy link mời! Hãy gửi link này cho bạn của bạn.',
+        toastCopied: '✅ Đã copy link mời! Hãy gửi link này cho cô ấy.',
         toastAiOn: '✨ Đã bật dịch thuật Gemini AI!',
         toastAiOff: 'Đã chuyển về Google Neural Translate miễn phí!',
         modalTitle: '✨ Bộ máy Phiên dịch (Translation Engine)',
@@ -705,7 +1003,6 @@
       }
     };
 
-    // State: Default to 'en' so when she clicks the public link, EVERYTHING is 100% in English immediately!
     let myRole = 'en';
     let myName = '';
     let roomPin = 'huy2026';
@@ -713,6 +1010,7 @@
     let activeConn = null;
     let reconnectTimer = null;
     let typingTimeout = null;
+    let pendingIncomingNotSeen = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedKey = localStorage.getItem('vn_en_gemini_key') || '';
@@ -727,14 +1025,18 @@
         document.getElementById('inputPin').value = urlPin;
       }
 
-      // If opened locally from file:// on Huy's PC without role=en, or if role=vn is specified -> switch to Vietnamese for Huy
-      // If opened via the public web link -> defaults to 100% English ('en') for her!
       if (urlRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
         selectRole('vn');
         document.getElementById('inputName').value = 'Huy';
       } else {
         selectRole('en');
       }
+
+      // Send SEEN receipt whenever window gains focus or user becomes visible
+      window.addEventListener('focus', flushSeenReceipts);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) flushSeenReceipts();
+      });
     });
 
     function selectRole(role) {
@@ -762,6 +1064,7 @@
       document.getElementById('lblSend').textContent = t.btnSend;
       document.getElementById('btnInvite').textContent = t.btnInvite;
       document.getElementById('btnAiEngine').textContent = t.btnAiEngine;
+      document.getElementById('btnUploadImg').title = t.uploadTitle;
 
       document.getElementById('modalTitle').textContent = t.modalTitle;
       document.getElementById('modalDesc').innerHTML = t.modalDesc;
@@ -877,13 +1180,30 @@
         if (data.type === 'CHAT') {
           document.getElementById('typingIndicator').textContent = '';
           renderMessage({
+            msgId: data.msgId,
             senderName: data.senderName,
             senderRole: data.senderRole,
             originalText: data.originalText,
             translatedText: data.translatedText,
+            imageData: data.imageData,
             time: data.time,
             isMine: false
           });
+
+          // Send Seen Receipt if window is active/visible, otherwise queue until focused
+          if (!document.hidden && document.hasFocus()) {
+            sendSeenReceipt(data.msgId);
+          } else {
+            pendingIncomingNotSeen.push(data.msgId);
+            // Also send immediately if tab is visible on mobile where hasFocus may vary
+            if (!document.hidden) {
+              sendSeenReceipt(data.msgId);
+            }
+          }
+        }
+
+        if (data.type === 'SEEN') {
+          markMessageAsSeen(data.msgId, data.seenAt);
         }
       });
 
@@ -891,6 +1211,32 @@
         activeConn = null;
         updateStatus(false, I18N[myRole].statusDisconnected);
       });
+    }
+
+    function sendSeenReceipt(msgId) {
+      if (!msgId || !activeConn || !activeConn.open) return;
+      const seenAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      activeConn.send({
+        type: 'SEEN',
+        msgId: msgId,
+        seenAt: seenAt
+      });
+    }
+
+    function flushSeenReceipts() {
+      while (pendingIncomingNotSeen.length > 0) {
+        const id = pendingIncomingNotSeen.shift();
+        sendSeenReceipt(id);
+      }
+    }
+
+    function markMessageAsSeen(msgId, seenAt) {
+      const t = I18N[myRole];
+      const statusEl = document.getElementById(`status-${msgId}`);
+      if (statusEl) {
+        statusEl.className = 'msg-status seen';
+        statusEl.textContent = t.seenText(seenAt);
+      }
     }
 
     function updateStatus(isOnline, text) {
@@ -911,6 +1257,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('msgInput');
       input.addEventListener('input', () => {
+        flushSeenReceipts();
         if (activeConn && activeConn.open) {
           activeConn.send({ type: 'TYPING', name: myName });
         }
@@ -918,6 +1265,7 @@
     });
 
     async function translateText(text, fromLang, toLang) {
+      if (!text) return '';
       const geminiKey = (localStorage.getItem('vn_en_gemini_key') || '').trim();
 
       if (geminiKey) {
@@ -954,8 +1302,75 @@
       return text;
     }
 
+    // Compress and resize uploaded image so it transfers fast over WebRTC P2P
+    function compressImageFile(file, maxWidth = 1024, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleImageUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      event.target.value = '';
+
+      try {
+        const compressedDataUrl = await compressImageFile(file);
+        const captionText = document.getElementById('msgInput').value.trim();
+        document.getElementById('msgInput').value = '';
+
+        const fromLang = myRole === 'vn' ? 'vi' : 'en';
+        const toLang = myRole === 'vn' ? 'en' : 'vi';
+        const translatedCaption = captionText ? await translateText(captionText, fromLang, toLang) : '';
+
+        const msgId = 'm-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const payload = {
+          type: 'CHAT',
+          msgId: msgId,
+          senderName: myName,
+          senderRole: myRole,
+          originalText: captionText,
+          translatedText: translatedCaption,
+          imageData: compressedDataUrl,
+          time: timeStr
+        };
+
+        renderMessage({ ...payload, isMine: true });
+
+        if (activeConn && activeConn.open) {
+          activeConn.send(payload);
+        }
+      } catch (err) {
+        console.error('Image upload error:', err);
+      }
+    }
+
     async function handleSendMessage(e) {
       e.preventDefault();
+      flushSeenReceipts();
       const input = document.getElementById('msgInput');
       const text = input.value.trim();
       if (!text) return;
@@ -968,14 +1383,17 @@
       const toLang = myRole === 'vn' ? 'en' : 'vi';
 
       const translatedText = await translateText(text, fromLang, toLang);
+      const msgId = 'm-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       const payload = {
         type: 'CHAT',
+        msgId: msgId,
         senderName: myName,
         senderRole: myRole,
         originalText: text,
         translatedText: translatedText,
+        imageData: null,
         time: timeStr
       };
 
@@ -992,7 +1410,13 @@
       input.focus();
     }
 
-    function renderMessage({ senderName, senderRole, originalText, translatedText, time, isMine }) {
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightboxImg').src = src;
+      lb.style.display = 'flex';
+    }
+
+    function renderMessage({ msgId, senderName, senderRole, originalText, translatedText, imageData, time, isMine }) {
       const t = I18N[myRole];
       const area = document.getElementById('messagesArea');
       const row = document.createElement('div');
@@ -1002,11 +1426,6 @@
       const targetFlag = senderRole === 'vn' ? '🇬🇧' : '🇻🇳';
       const targetLangCode = senderRole === 'vn' ? 'en-US' : 'vi-VN';
 
-      const mainDisplay = isMine ? `${flag} ${originalText}` : `${targetFlag} ${translatedText}`;
-      const subDisplay = isMine
-        ? t.translatedToPeer(targetFlag, translatedText)
-        : t.originalFromPeer(flag, originalText);
-
       const meta = document.createElement('div');
       meta.className = 'msg-meta';
       meta.textContent = `${flag} ${senderName} • ${time}`;
@@ -1014,30 +1433,61 @@
       const bubble = document.createElement('div');
       bubble.className = 'msg-bubble';
 
-      const primaryDiv = document.createElement('div');
-      primaryDiv.className = 'primary-text';
-      primaryDiv.textContent = mainDisplay;
+      // If message contains an uploaded image
+      if (imageData) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'chat-image-wrap';
+        const img = document.createElement('img');
+        img.className = 'chat-image';
+        img.src = imageData;
+        img.alt = 'Shared photo';
+        img.onclick = () => openLightbox(imageData);
+        imgWrap.appendChild(img);
+        bubble.appendChild(imgWrap);
+      }
 
-      const secondaryDiv = document.createElement('div');
-      secondaryDiv.className = 'secondary-text';
+      // If message contains text
+      if (originalText) {
+        const mainDisplay = isMine ? `${flag} ${originalText}` : `${targetFlag} ${translatedText}`;
+        const subDisplay = isMine
+          ? t.translatedToPeer(targetFlag, translatedText)
+          : t.originalFromPeer(flag, originalText);
 
-      const subSpan = document.createElement('span');
-      subSpan.textContent = subDisplay;
+        const primaryDiv = document.createElement('div');
+        primaryDiv.className = 'primary-text';
+        primaryDiv.textContent = mainDisplay;
 
-      const ttsBtn = document.createElement('button');
-      ttsBtn.className = 'tts-btn';
-      ttsBtn.title = t.ttsTitle;
-      ttsBtn.textContent = '🔊';
-      ttsBtn.onclick = () => speakUtterance(translatedText, targetLangCode);
+        const secondaryDiv = document.createElement('div');
+        secondaryDiv.className = 'secondary-text';
 
-      secondaryDiv.appendChild(subSpan);
-      secondaryDiv.appendChild(ttsBtn);
+        const subSpan = document.createElement('span');
+        subSpan.textContent = subDisplay;
 
-      bubble.appendChild(primaryDiv);
-      bubble.appendChild(secondaryDiv);
+        const ttsBtn = document.createElement('button');
+        ttsBtn.className = 'tts-btn';
+        ttsBtn.title = t.ttsTitle;
+        ttsBtn.textContent = '🔊';
+        ttsBtn.onclick = () => speakUtterance(translatedText, targetLangCode);
+
+        secondaryDiv.appendChild(subSpan);
+        secondaryDiv.appendChild(ttsBtn);
+
+        bubble.appendChild(primaryDiv);
+        bubble.appendChild(secondaryDiv);
+      }
 
       row.appendChild(meta);
       row.appendChild(bubble);
+
+      // Sent / Seen indicator on outgoing messages
+      if (isMine && msgId) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'msg-status';
+        statusDiv.id = `status-${msgId}`;
+        statusDiv.textContent = t.sentText;
+        row.appendChild(statusDiv);
+      }
+
       area.appendChild(row);
       area.scrollTop = area.scrollHeight;
     }
