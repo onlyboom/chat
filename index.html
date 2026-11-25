@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>🐱 Private Translation Chat ⇄ Phòng Chat Phiên Dịch</title>
   <!-- PeerJS for Serverless Direct Encrypted WebRTC P2P -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -12,8 +12,8 @@
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #2e1065 0%, #4c1d95 45%, #831843 100%);
-      --card-bg: rgba(24, 20, 44, 0.88);
-      --card-border: rgba(255, 192, 229, 0.25);
+      --card-bg: rgba(24, 20, 44, 0.9);
+      --card-border: rgba(255, 192, 229, 0.28);
       --text-main: #ffffff;
       --text-muted: #f1d5e8;
       --accent-vn: #fb7185;
@@ -32,16 +32,22 @@
       padding: 0;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-gradient);
       color: var(--text-main);
-      height: 100dvh;
+      position: fixed;
+      inset: 0;
+    }
+
+    body {
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      position: relative;
     }
 
     .cute-bg-decor {
@@ -59,8 +65,8 @@
       position: fixed;
       bottom: 12px;
       right: 18px;
-      width: 170px;
-      height: 170px;
+      width: 165px;
+      height: 165px;
       pointer-events: none;
       z-index: 1;
       opacity: 0.92;
@@ -84,31 +90,33 @@
       position: relative;
       z-index: 2;
       width: 92%;
-      max-width: 455px;
+      max-width: 450px;
+      max-height: 94dvh;
+      overflow-y: auto;
       background: var(--card-bg);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
       border: 2px solid var(--card-border);
       border-radius: 28px;
-      padding: 32px 28px;
+      padding: 28px 24px;
       box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.65);
       animation: fadeIn 0.35s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .brand-header {
       text-align: center;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .cute-cat-avatar {
-      width: 76px;
-      height: 76px;
-      margin: 0 auto 10px;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 8px;
       display: block;
       filter: drop-shadow(0 6px 14px rgba(236, 72, 153, 0.35));
     }
@@ -118,51 +126,44 @@
       align-items: center;
       gap: 10px;
       background: rgba(255, 255, 255, 0.12);
-      padding: 7px 18px;
+      padding: 6px 16px;
       border-radius: 999px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       border: 1px solid rgba(255, 255, 255, 0.22);
     }
 
     .brand-header h1 {
       font-family: 'Quicksand', sans-serif;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
       margin-bottom: 6px;
       color: #fff;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     }
 
     .brand-header p {
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
     .role-selector {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .role-card {
       background: rgba(15, 23, 42, 0.65);
       border: 2px solid rgba(255, 255, 255, 0.15);
       border-radius: 18px;
-      padding: 15px 12px;
+      padding: 14px 10px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
-    }
-
-    .role-card:hover {
-      border-color: rgba(255, 255, 255, 0.38);
-      transform: translateY(-2px);
     }
 
     .role-card.active-vn {
@@ -178,32 +179,32 @@
     }
 
     .role-flag {
-      font-size: 2.05rem;
-      margin-bottom: 5px;
+      font-size: 1.9rem;
+      margin-bottom: 4px;
       display: block;
     }
 
     .role-title {
       font-weight: 700;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
       color: #ffffff;
     }
 
     .role-sub {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #e2e8f0;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .form-group label {
       display: flex;
       justify-content: space-between;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 600;
       color: #fce7f3;
       margin-bottom: 6px;
@@ -214,12 +215,11 @@
       background: rgba(15, 18, 38, 0.85);
       border: 1.5px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
-      padding: 13px 15px;
+      padding: 12px 14px;
       border-radius: 14px;
       font-size: 1rem;
       font-weight: 500;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .input-box:focus {
@@ -233,12 +233,12 @@
       gap: 9px;
       background: rgba(34, 197, 94, 0.14);
       border: 1px solid rgba(74, 222, 128, 0.35);
-      padding: 11px 13px;
+      padding: 10px 12px;
       border-radius: 14px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #dcfce7;
-      margin-bottom: 18px;
-      line-height: 1.45;
+      margin-bottom: 16px;
+      line-height: 1.4;
     }
 
     .btn-primary {
@@ -246,24 +246,15 @@
       background: var(--my-bubble);
       color: #fff;
       border: none;
-      padding: 15px;
+      padding: 14px;
       border-radius: 14px;
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 10px 25px -5px rgba(219, 39, 119, 0.5);
-      transition: opacity 0.2s, transform 0.1s;
     }
 
-    .btn-primary:hover {
-      opacity: 0.96;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.99);
-    }
-
-    /* Main Chat Screen */
+    /* Main Chat Screen - Mobile & Desktop Safe Layout */
     .chat-container {
       position: relative;
       z-index: 2;
@@ -271,12 +262,12 @@
       flex-direction: column;
       width: 100%;
       max-width: 820px;
+      height: 100%;
       height: 100dvh;
-      background: rgba(20, 16, 38, 0.86);
+      background: rgba(20, 16, 38, 0.88);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
-      border-left: 1px solid var(--card-border);
-      border-right: 1px solid var(--card-border);
+      overflow: hidden;
     }
 
     @media (min-width: 820px) {
@@ -284,44 +275,45 @@
         height: 93dvh;
         border-radius: 28px;
         border: 2px solid var(--card-border);
-        overflow: hidden;
         box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7);
       }
     }
 
     .chat-header {
-      padding: 14px 18px;
-      background: rgba(36, 25, 64, 0.95);
+      flex-shrink: 0;
+      padding: 10px 14px;
+      background: rgba(36, 25, 64, 0.96);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       z-index: 3;
-      flex-wrap: wrap;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
     }
 
     .header-cat-icon {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       flex-shrink: 0;
     }
 
     .status-dot {
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: var(--warning);
       box-shadow: 0 0 8px var(--warning);
-      transition: all 0.3s;
       display: inline-block;
-      margin-right: 6px;
+      margin-right: 5px;
+      flex-shrink: 0;
     }
 
     .status-dot.online {
@@ -329,76 +321,85 @@
       box-shadow: 0 0 10px var(--success);
     }
 
+    .room-info {
+      min-width: 0;
+      flex: 1;
+    }
+
     .room-info h2 {
       font-family: 'Quicksand', sans-serif;
-      font-size: 1.06rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
       color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .room-info p {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 500;
       color: #fbcfe8;
       display: flex;
       align-items: center;
       margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      flex-shrink: 0;
     }
 
     .icon-btn {
       background: rgba(255, 255, 255, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #ffffff;
-      padding: 7px 11px;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
     }
 
-    .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.22);
-    }
-
+    /* Messages Area - Guaranteed no horizontal clipping on mobile */
     .messages-area {
       position: relative;
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 22px 18px;
+      overflow-x: hidden;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
     }
 
     .cat-wallpaper {
       position: sticky;
-      top: 22%;
+      top: 24%;
       align-self: center;
       pointer-events: none;
-      opacity: 0.16;
+      opacity: 0.14;
       z-index: 0;
       text-align: center;
-      margin-bottom: -170px;
+      margin-bottom: -150px;
       user-select: none;
     }
 
     .cat-wallpaper svg {
-      width: 165px;
-      height: 165px;
+      width: 150px;
+      height: 150px;
     }
 
     .system-banner {
@@ -408,13 +409,13 @@
       background: rgba(244, 114, 182, 0.15);
       border: 1px solid rgba(244, 114, 182, 0.35);
       color: #fce7f3;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      padding: 9px 18px;
-      border-radius: 999px;
+      padding: 8px 14px;
+      border-radius: 16px;
       text-align: center;
-      max-width: 92%;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      max-width: 95%;
+      word-break: break-word;
     }
 
     .msg-row {
@@ -422,7 +423,8 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      max-width: 84%;
+      max-width: 88%;
+      width: fit-content;
       animation: fadeIn 0.2s ease;
     }
 
@@ -437,59 +439,65 @@
     }
 
     .msg-meta {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #f9a8d4;
-      margin-bottom: 5px;
-      padding: 0 5px;
+      margin-bottom: 4px;
+      padding: 0 4px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .msg-bubble {
-      padding: 14px 17px;
-      border-radius: 20px;
+      padding: 12px 15px;
+      border-radius: 18px;
       position: relative;
-      line-height: 1.5;
+      line-height: 1.48;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
       word-break: break-word;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+      max-width: 100%;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }
 
     .msg-row.mine .msg-bubble {
       background: var(--my-bubble);
       border: 1px solid rgba(255, 255, 255, 0.22);
-      border-bottom-right-radius: 5px;
+      border-bottom-right-radius: 4px;
       color: #ffffff;
     }
 
     .msg-row.theirs .msg-bubble {
       background: var(--peer-bubble);
-      border: 1.5px solid rgba(244, 114, 182, 0.32);
-      border-bottom-left-radius: 5px;
+      border: 1.5px solid rgba(244, 114, 182, 0.35);
+      border-bottom-left-radius: 4px;
       color: #ffffff;
     }
 
     .primary-text {
-      font-size: 1.14rem;
+      font-size: 1.08rem;
       font-weight: 700;
       color: #ffffff;
-      letter-spacing: 0.01em;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-      margin-bottom: 8px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.32);
+      margin-bottom: 7px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .secondary-text {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: #fef08a;
-      background: rgba(0, 0, 0, 0.26);
-      padding: 7px 11px;
+      background: rgba(0, 0, 0, 0.28);
+      padding: 7px 10px;
       border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .msg-row.theirs .secondary-text {
@@ -498,25 +506,21 @@
     }
 
     .chat-image-wrap {
-      margin-bottom: 8px;
-      border-radius: 14px;
+      margin-bottom: 6px;
+      border-radius: 13px;
       overflow: hidden;
       border: 1.5px solid rgba(255, 255, 255, 0.25);
       background: rgba(0, 0, 0, 0.3);
-      max-width: 310px;
+      max-width: 260px;
+      width: 100%;
     }
 
     .chat-image {
       display: block;
       width: 100%;
-      max-height: 320px;
+      max-height: 290px;
       object-fit: cover;
       cursor: zoom-in;
-      transition: transform 0.2s ease;
-    }
-
-    .chat-image:hover {
-      transform: scale(1.02);
     }
 
     .tts-btn {
@@ -530,22 +534,16 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       flex-shrink: 0;
-      transition: transform 0.15s, background 0.15s;
-    }
-
-    .tts-btn:hover {
-      background: rgba(255, 255, 255, 0.38);
-      transform: scale(1.1);
     }
 
     .msg-status {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #cbd5e1;
-      margin-top: 4px;
-      padding: 0 6px;
+      margin-top: 3px;
+      padding: 0 5px;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -557,41 +555,42 @@
     }
 
     .typing-indicator {
-      font-size: 0.84rem;
+      flex-shrink: 0;
+      font-size: 0.8rem;
       font-weight: 600;
       color: #f9a8d4;
-      padding: 0 22px 6px;
-      min-height: 24px;
+      padding: 2px 16px 4px;
+      min-height: 22px;
       font-style: italic;
     }
 
     .chat-input-bar {
+      flex-shrink: 0;
       position: relative;
-      padding: 13px 16px;
-      background: rgba(36, 25, 64, 0.96);
+      padding: 10px 12px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      background: rgba(36, 25, 64, 0.98);
       border-top: 1px solid var(--card-border);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       z-index: 10;
     }
 
-    /* TikTok-style Emoji Picker Popover */
     .emoji-picker-popover {
       display: none;
       position: absolute;
-      bottom: 74px;
-      left: 16px;
-      width: 330px;
-      max-width: calc(100vw - 32px);
+      bottom: 68px;
+      left: 12px;
+      width: 320px;
+      max-width: calc(100vw - 24px);
       background: rgba(28, 20, 52, 0.98);
       backdrop-filter: blur(18px);
       border: 2px solid rgba(244, 114, 182, 0.45);
       border-radius: 22px;
-      padding: 14px;
+      padding: 12px;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
       z-index: 100;
-      animation: fadeIn 0.18s ease;
     }
 
     .emoji-picker-popover.open {
@@ -605,94 +604,80 @@
       font-size: 0.82rem;
       font-weight: 700;
       color: #fbcfe8;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       padding: 0 4px;
     }
 
     .emoji-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      max-height: 215px;
+      gap: 5px;
+      max-height: 200px;
       overflow-y: auto;
-      padding-right: 2px;
     }
 
     .emoji-item {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid transparent;
-      border-radius: 11px;
-      font-size: 1.4rem;
-      height: 40px;
+      border-radius: 10px;
+      font-size: 1.35rem;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.14s ease, background 0.14s ease;
     }
 
     .emoji-item:hover {
       background: rgba(244, 114, 182, 0.28);
       border-color: rgba(244, 114, 182, 0.5);
-      transform: scale(1.18);
     }
 
     .upload-btn {
       background: rgba(244, 114, 182, 0.2);
       border: 1.5px solid rgba(244, 114, 182, 0.45);
       color: #fff;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       flex-shrink: 0;
-      transition: all 0.2s;
-    }
-
-    .upload-btn:hover {
-      background: rgba(244, 114, 182, 0.38);
-      transform: scale(1.06);
     }
 
     .chat-input {
       flex: 1;
-      background: rgba(15, 18, 38, 0.9);
+      min-width: 0;
+      background: rgba(15, 18, 38, 0.92);
       border: 1.5px solid rgba(255, 255, 255, 0.28);
       color: #ffffff;
-      padding: 13px 18px;
+      padding: 11px 15px;
       border-radius: 999px;
-      font-size: 1.02rem;
+      font-size: 1rem;
       font-weight: 500;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .chat-input::placeholder {
       color: #cbd5e1;
     }
 
-    .chat-input:focus {
-      border-color: #f472b6;
-      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
-    }
-
     .send-btn {
       background: var(--my-bubble);
       color: #fff;
       border: none;
-      padding: 13px 22px;
+      padding: 11px 18px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-shrink: 0;
       box-shadow: 0 4px 14px rgba(219, 39, 119, 0.45);
     }
@@ -719,63 +704,28 @@
       max-width: 95%;
       max-height: 92dvh;
       border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-    }
-
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-card {
-      background: #241940;
-      border: 1.5px solid rgba(244, 114, 182, 0.35);
-      border-radius: 22px;
-      max-width: 430px;
-      width: 100%;
-      padding: 24px;
-    }
-
-    .modal-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-
-    .modal-card p {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-      line-height: 1.45;
     }
 
     .toast {
       position: fixed;
-      bottom: 88px;
+      bottom: 80px;
       left: 50%;
       transform: translateX(-50%);
       background: #10b981;
       color: #fff;
-      padding: 11px 20px;
+      padding: 10px 18px;
       border-radius: 999px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 700;
       box-shadow: 0 10px 25px rgba(0,0,0,0.45);
       display: none;
       z-index: 200;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-  <!-- Cute Decorative Background & Corner Kawaii Cat -->
   <div class="cute-bg-decor"></div>
   <div class="floating-cat-bg" aria-hidden="true">
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -845,7 +795,7 @@
       <label>
         <span id="lblName">Your Name</span>
       </label>
-      <input type="text" id="inputName" class="input-box" placeholder="E.g. Emma" value="" />
+      <input type="text" id="inputName" class="input-box" placeholder="E.g. Magda" value="" />
     </div>
 
     <div class="form-group">
@@ -880,15 +830,15 @@
         </svg>
         <div class="room-info">
           <h2 id="roomTitle">🐱 Private Translation Chat</h2>
-          <p><span class="status-dot" id="statusDot"></span><span id="peerStatus">Waiting for connection...</span></p>
+          <p><span class="status-dot" id="statusDot"></span><span id="peerStatus">Connecting...</span></p>
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="forceReconnect()" id="btnReconnect" title="Reconnect / Kết nối lại">
+        <button class="icon-btn" onclick="forceReconnect()" id="btnReconnect" title="Sync Messages / Đồng bộ tin nhắn">
           🔄 Sync
         </button>
         <button class="icon-btn" onclick="copyInviteLink()" id="btnInvite" title="Copy Invite Link">
-          🔗 Copy Link
+          🔗 Link
         </button>
         <button class="icon-btn" onclick="leaveRoom()" id="btnLeave" title="Change Role / Đổi vai trò">
           🚪
@@ -917,7 +867,6 @@
     <div class="typing-indicator" id="typingIndicator"></div>
 
     <form class="chat-input-bar" onsubmit="handleSendMessage(event)">
-      <!-- TikTok Style Emoji Picker Popover -->
       <div class="emoji-picker-popover" id="emojiPopover">
         <div class="emoji-picker-header">
           <span id="emojiHeaderTitle">✨ Cảm xúc TikTok / Emojis</span>
@@ -930,14 +879,14 @@
       <button type="button" class="upload-btn" id="btnUploadImg" onclick="document.getElementById('imageInput').click()" title="Send Photo / Gửi ảnh">
         📷
       </button>
-      <button type="button" class="upload-btn" id="btnEmoji" onclick="toggleEmojiPicker(event)" title="Chọn Icon mặt cười / Emojis">
+      <button type="button" class="upload-btn" id="btnEmoji" onclick="toggleEmojiPicker(event)" title="Emojis">
         😊
       </button>
       <input
         type="text"
         id="msgInput"
         class="chat-input"
-        placeholder="Type here in English... (Automatically translated to Vietnamese)"
+        placeholder="Type here in English..."
         autocomplete="off"
       />
       <button type="submit" class="send-btn" id="btnSend">
@@ -954,38 +903,68 @@
   <div class="toast" id="toastMsg">Invite link copied!</div>
 
   <script>
+    // Anti-F12 / Anti-Inspect / Right-Click Protection & Encoded Default Room Keys
+    const _0xK = [97, 103, 114, 97, 102, 107, 101, 110, 115]; // agrafkens
+    const _0xLegacy = [104, 117, 121, 50, 48, 50, 54]; // huy2026
+    const _getDefPin = () => String.fromCharCode(..._0xK);
+    const _getLegacyPin = () => String.fromCharCode(..._0xLegacy);
+
+    (function protectSourceCode() {
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+      });
+      document.addEventListener('keydown', (e) => {
+        const k = (e.key || '').toUpperCase();
+        if (
+          e.keyCode === 123 ||
+          k === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'K'].includes(k)) ||
+          (e.metaKey && e.altKey && ['I', 'J', 'C', 'K', 'U'].includes(k)) ||
+          (e.ctrlKey && ['U', 'S'].includes(k)) ||
+          (e.metaKey && ['U', 'S'].includes(k))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, true);
+      document.addEventListener('dragstart', (e) => e.preventDefault());
+    })();
+
     const I18N = {
       en: {
         badge: '🇬🇧 English ⇄ Vietnamese 🇻🇳',
         title: 'Cute Cat Translation Chat 🐾',
         subtitle: 'Type in English → He receives it instantly in Vietnamese, and vice versa in real-time!',
         lblName: 'Your Name',
-        namePlaceholder: 'E.g. Emma',
-        defaultName: 'Emma 🐱',
+        namePlaceholder: 'E.g. Magda',
+        defaultName: 'Magda 🐱',
         lblPin: '🔒 Secret Room Code (Room PIN)',
         pinPlaceholder: 'Enter your shared secret code',
         securityHtml: '<strong>100% Private P2P Chat:</strong> Text & photos are sent directly between your two browsers (max 2 people).',
         btnJoin: 'Start Private Chat 🐾 →',
         roomTitle: '🐱 Private Translation Chat',
         statusInit: 'Starting secure channel...',
-        statusWaiting: 'Waiting for your friend in Vietnam to connect...',
-        statusConnected: '🟢 Connected directly with Vietnam!',
+        statusWaiting: 'Waiting for Huy in Vietnam...',
+        statusConnected: '🟢 Connected with Vietnam!',
         statusConnectedWith: (name) => `🟢 Chatting with ${name} 🇻🇳`,
-        statusDisconnected: '🟡 Reconnecting with Vietnam...',
-        joinedBanner: (name) => `🐾 ${name} (Vietnam) is connected!`,
-        welcomeBanner: '🐾 Private P2P connection active. Just type in English or click 📷 to send a photo!',
+        statusDisconnected: '🟡 Reconnecting...',
+        welcomeBanner: '🐾 Connected! Type in English or tap 📷 to send photos!',
         typingText: (name) => `🐱 ${name} is typing...`,
-        inputPlaceholder: 'Type here in English... (Translated to Vietnamese)',
+        sendingImgText: (pct) => `📸 Sending photo... ${pct}%`,
+        receivingImgText: (pct) => `📸 Receiving photo... ${pct}%`,
+        inputPlaceholder: 'Type in English...',
         btnSend: 'Send',
-        btnInvite: '🔗 Copy Link',
+        btnInvite: '🔗 Link',
         uploadTitle: 'Send a photo',
         translatedToPeer: (flag, text) => `Translated to ${flag}: ${text}`,
         originalFromPeer: (flag, text) => `Original ${flag}: ${text}`,
         sentText: '✓ Sent',
+        deliveredText: '✓✓ Delivered',
         seenText: (time) => `✓✓ Seen at ${time}`,
         ttsTitle: 'Listen to pronunciation',
         pinAlert: 'Please enter a Room Code with at least 4 characters!',
-        dupRoleAlert: 'Notice: You selected the same role as your partner. Switching or reconnecting...',
         toastCopied: '✅ Invite link copied!'
       },
       vn: {
@@ -1004,67 +983,38 @@
         statusWaiting: 'Đang chờ cô ấy mở link kết nối...',
         statusConnected: '🟢 Đã kết nối trực tiếp 2 chiều!',
         statusConnectedWith: (name) => `🟢 Đang trò chuyện cùng ${name} 🇬🇧`,
-        statusDisconnected: '🟡 Đang tự động đồng bộ lại kết nối...',
-        joinedBanner: (name) => `🐾 Đã kết nối 2 chiều với ${name}!`,
+        statusDisconnected: '🟡 Đang tự động đồng bộ lại...',
         welcomeBanner: '🐾 Kết nối P2P đã bật. Bạn có thể gõ Tiếng Việt hoặc bấm 📷 để gửi ảnh!',
         typingText: (name) => `🐱 ${name} đang gõ tin nhắn...`,
-        inputPlaceholder: 'Nhập tiếng Việt tại đây... (Tự dịch sang tiếng Anh)',
+        sendingImgText: (pct) => `📸 Đang gửi ảnh... ${pct}%`,
+        receivingImgText: (pct) => `📸 Đang nhận ảnh... ${pct}%`,
+        inputPlaceholder: 'Nhập tiếng Việt tại đây...',
         btnSend: 'Gửi',
-        btnInvite: '🔗 Copy Link',
+        btnInvite: '🔗 Link',
         uploadTitle: 'Gửi hình ảnh',
         translatedToPeer: (flag, text) => `Đã dịch sang ${flag}: ${text}`,
         originalFromPeer: (flag, text) => `Bản gốc ${flag}: ${text}`,
         sentText: '✓ Đã gửi',
+        deliveredText: '✓✓ Đã nhận',
         seenText: (time) => `✓✓ Đã xem lúc ${time}`,
         ttsTitle: 'Nghe phát âm',
         pinAlert: 'Vui lòng nhập Mã khóa phòng ít nhất 4 ký tự!',
-        dupRoleAlert: 'Vai trò này đang mở ở tab khác! Hãy đóng tab thừa hoặc kiểm tra xem bạn có chọn đúng "Tôi ở Việt Nam" chưa.',
         toastCopied: '✅ Đã copy link mời!'
       }
     };
 
-    // Anti-F12 / Anti-Inspect / Right-Click Protection & Encoded Default Room Key
-    const _0xK = [97, 103, 114, 97, 102, 107, 101, 110, 115];
-    const _getDefPin = () => String.fromCharCode(..._0xK);
-
-    (function protectSourceCode() {
-      // 1. Block Right-Click Context Menu
-      document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        return false;
-      });
-
-      // 2. Block F12, Ctrl+Shift+I/J/C, Ctrl+U, Cmd+Opt+I/J/C/U
-      document.addEventListener('keydown', (e) => {
-        const k = (e.key || '').toUpperCase();
-        if (
-          e.keyCode === 123 ||
-          k === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'K'].includes(k)) ||
-          (e.metaKey && e.altKey && ['I', 'J', 'C', 'K', 'U'].includes(k)) ||
-          (e.ctrlKey && ['U', 'S'].includes(k)) ||
-          (e.metaKey && ['U', 'S'].includes(k))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      }, true);
-
-      // 3. Block dragging/selecting sensitive UI
-      document.addEventListener('dragstart', (e) => e.preventDefault());
-    })();
-
     let myRole = 'en';
     let myName = '';
     let roomPin = _getDefPin();
-    let peer = null;
-    // Keep track of ALL active connections (both incoming & outgoing, plus legacy IDs) so messages ALWAYS go through both ways!
+    let peers = []; // Listen on both agrafkens and legacy huy2026 simultaneously so neither side EVER misses connection!
     let connections = [];
     let reconnectTimer = null;
+    let syncInterval = null;
     let typingTimeout = null;
     let pendingIncomingNotSeen = [];
     let renderedMsgIds = new Set();
+    let outgoingMessagesMap = new Map(); // msgId -> full payload for guaranteed delivery & resync
+    let incomingImageChunks = {}; // msgId -> { meta, chunks, total }
 
     const TIKTOK_EMOJIS = [
       '😂', '🤣', '😜', '😝', '🤪', '🥰', '😍',
@@ -1128,17 +1078,10 @@
       const urlRole = params.get('role');
       const savedRole = localStorage.getItem('cat_chat_role');
       const savedName = localStorage.getItem('cat_chat_name');
-      const savedPin = localStorage.getItem('cat_chat_pin');
 
       const defPin = _getDefPin();
-      if (urlPin) {
-        document.getElementById('inputPin').value = urlPin;
-      } else if (savedPin && savedPin !== 'huy2026') {
-        document.getElementById('inputPin').value = savedPin;
-      } else {
-        document.getElementById('inputPin').value = defPin;
-        localStorage.setItem('cat_chat_pin', defPin);
-      }
+      document.getElementById('inputPin').value = urlPin || defPin;
+      localStorage.setItem('cat_chat_pin', urlPin || defPin);
 
       if (urlRole === 'vn' || savedRole === 'vn' || (window.location.protocol === 'file:' && urlRole !== 'en')) {
         selectRole('vn');
@@ -1148,14 +1091,10 @@
         if (savedName) document.getElementById('inputName').value = savedName;
       }
 
-      // Cleanly release PeerJS ID immediately when refreshing (F5) so new page never gets blocked!
       window.addEventListener('beforeunload', () => {
-        if (peer && !peer.destroyed) {
-          try { peer.destroy(); } catch (e) {}
-        }
+        destroyAllPeers();
       });
 
-      // Auto-rejoin if user just refreshed (F5) while already in room!
       if (localStorage.getItem('cat_chat_joined') === '1') {
         joinPrivateRoom();
       }
@@ -1193,7 +1132,6 @@
       document.getElementById('btnUploadImg').title = t.uploadTitle;
     }
 
-    // Compatible hash supporting both new 'en' and previous 'nl' tabs if one side hasn't refreshed yet
     async function sha256Short(prefix, str) {
       const buf = new TextEncoder().encode(prefix + str.trim().toLowerCase());
       const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
@@ -1227,20 +1165,25 @@
       await startMeshConnections();
     }
 
+    function destroyAllPeers() {
+      peers.forEach(p => {
+        try { if (p && !p.destroyed) p.destroy(); } catch (e) {}
+      });
+      peers = [];
+      connections = [];
+    }
+
     function leaveRoom() {
       localStorage.removeItem('cat_chat_joined');
       if (reconnectTimer) clearInterval(reconnectTimer);
-      if (peer) peer.destroy();
-      connections = [];
+      if (syncInterval) clearInterval(syncInterval);
+      destroyAllPeers();
       document.getElementById('chatScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
     }
 
     async function forceReconnect() {
-      if (peer) {
-        try { peer.destroy(); } catch (e) {}
-      }
-      connections = [];
+      destroyAllPeers();
       await startMeshConnections();
     }
 
@@ -1248,46 +1191,59 @@
       const t = I18N[myRole];
       updateStatus(false, t.statusInit);
 
-      const hashEN = await sha256Short('vnen-bridge-2026-', roomPin);
-      const hashNL = await sha256Short('vnnl-bridge-2026-', roomPin);
+      destroyAllPeers();
 
-      const myPeerId = `vnen-${hashEN}-${myRole}`;
-      // Connect to both standard target and legacy target so even if one side is on an older tab, both directions work!
-      const targetIds = myRole === 'vn'
-        ? [`vnen-${hashEN}-en`, `vnnl-${hashNL}-nl`]
-        : [`vnen-${hashEN}-vn`, `vnnl-${hashNL}-vn`];
+      // Bridge BOTH 'agrafkens' and legacy 'huy2026' simultaneously so even if Magda's browser hasn't updated PIN yet,
+      // both browsers still connect and sync 100% of messages!
+      const pinsToBridge = Array.from(new Set([roomPin, _getDefPin(), _getLegacyPin()]));
+      const targetIds = [];
+
+      for (const pin of pinsToBridge) {
+        const hEN = await sha256Short('vnen-bridge-2026-', pin);
+        const myId = `vnen-${hEN}-${myRole}`;
+        const partnerRole = myRole === 'vn' ? 'en' : 'vn';
+        const partnerId = `vnen-${hEN}-${partnerRole}`;
+        targetIds.push({ myId, partnerId });
+      }
 
       if (reconnectTimer) clearInterval(reconnectTimer);
+      if (syncInterval) clearInterval(syncInterval);
 
-      peer = new Peer(myPeerId, { debug: 1 });
+      targetIds.forEach(({ myId, partnerId }) => {
+        const p = new Peer(myId, { debug: 0 });
+        peers.push(p);
 
-      peer.on('open', () => {
-        updateStatus(false, I18N[myRole].statusWaiting);
-        targetIds.forEach(id => connectToTarget(id));
+        p.on('open', () => {
+          connectToTarget(p, partnerId);
+        });
 
-        reconnectTimer = setInterval(() => {
-          pruneDeadConnections();
-          if (connections.length === 0) {
-            targetIds.forEach(id => connectToTarget(id));
-          }
-        }, 3000);
+        p.on('connection', (conn) => {
+          setupConnectionHandlers(conn);
+        });
       });
 
-      // CRITICAL FIX: Always accept new incoming connections from partner (e.g. when partner refreshes F5)
-      // instead of blocking them with ROOM_LOCKED!
-      peer.on('connection', (conn) => {
-        setupConnectionHandlers(conn);
-      });
-
-      peer.on('error', (err) => {
-        if (err.type === 'unavailable-id') {
-          // If old tab hasn't released ID yet, retry after 1.5s automatically
-          setTimeout(() => {
-            if (!peer || peer.destroyed) return;
-            forceReconnect();
-          }, 1500);
+      reconnectTimer = setInterval(() => {
+        pruneDeadConnections();
+        if (connections.length === 0) {
+          updateStatus(false, I18N[myRole].statusWaiting);
+          peers.forEach((p, idx) => {
+            if (p && !p.disconnected && !p.destroyed && targetIds[idx]) {
+              connectToTarget(p, targetIds[idx].partnerId);
+            }
+          });
         }
-      });
+      }, 3000);
+
+      // Every 4 seconds, ask partner what message IDs they have and automatically resend any missing message!
+      syncInterval = setInterval(() => {
+        pruneDeadConnections();
+        if (connections.length > 0) {
+          broadcastData({
+            type: 'SYNC_STATE',
+            receivedIds: Array.from(renderedMsgIds)
+          });
+        }
+      }, 4000);
     }
 
     function pruneDeadConnections() {
@@ -1305,24 +1261,24 @@
       });
     }
 
-    function connectToTarget(targetPeerId) {
+    function connectToTarget(peerInstance, targetPeerId) {
       pruneDeadConnections();
       if (connections.some(c => c.peer === targetPeerId && c.open)) return;
-      if (!peer || peer.disconnected || peer.destroyed) return;
-      const conn = peer.connect(targetPeerId, { reliable: true });
+      if (!peerInstance || peerInstance.disconnected || peerInstance.destroyed) return;
+      const conn = peerInstance.connect(targetPeerId, { reliable: true });
       setupConnectionHandlers(conn);
     }
 
     function setupConnectionHandlers(conn) {
       conn.on('open', () => {
-        // Replace any stale connection to the same peer ID with this fresh open one
         connections = connections.filter(c => c.peer !== conn.peer && c.open);
         connections.push(conn);
 
         conn.send({
           type: 'HELLO',
           name: myName,
-          role: myRole
+          role: myRole,
+          receivedIds: Array.from(renderedMsgIds)
         });
         updateStatus(true, I18N[myRole].statusConnected);
       });
@@ -1331,7 +1287,6 @@
         if (!data || typeof data !== 'object') return;
         const t = I18N[myRole];
 
-        // Ensure this connection is in our active list for two-way replies!
         if (!connections.includes(conn)) {
           connections = connections.filter(c => c.peer !== conn.peer && c.open);
           connections.push(conn);
@@ -1339,6 +1294,14 @@
 
         if (data.type === 'HELLO') {
           updateStatus(true, t.statusConnectedWith(data.name));
+          if (Array.isArray(data.receivedIds)) {
+            resendMissingMessagesToPartner(data.receivedIds);
+          }
+        }
+
+        // Automatic Missing Message Recovery: If partner missed any message, resend it automatically!
+        if (data.type === 'SYNC_STATE' && Array.isArray(data.receivedIds)) {
+          resendMissingMessagesToPartner(data.receivedIds);
         }
 
         if (data.type === 'TYPING') {
@@ -1348,44 +1311,25 @@
           typingTimeout = setTimeout(() => { ind.textContent = ''; }, 2500);
         }
 
+        // Handle Chunked Mobile Image Transfer (16KB chunks so mobile WebRTC never drops photos!)
+        if (data.type === 'IMG_CHUNK') {
+          handleIncomingImageChunk(data);
+          return;
+        }
+
         if (data.type === 'CHAT') {
           document.getElementById('typingIndicator').textContent = '';
           const msgId = data.msgId || ('m-' + Date.now());
+
+          // Send instant ACK so sender knows it arrived
+          broadcastData({ type: 'DELIVERED', msgId: msgId });
+
           if (renderedMsgIds.has(msgId)) return;
+          processIncomingChatMessage(data, msgId);
+        }
 
-          // Receiver-side auto-verify & translate:
-          // If sender's browser (e.g. in EU with strict adblock/privacy) failed to translate or sent identical text,
-          // receiver translates it locally right before displaying!
-          (async () => {
-            let orig = (data.originalText || '').trim();
-            let trans = (data.translatedText || '').trim();
-            const targetLang = myRole === 'vn' ? 'vi' : 'en';
-            const sourceLang = myRole === 'vn' ? 'en' : 'vi';
-
-            if (orig && (!trans || trans.toLowerCase() === orig.toLowerCase())) {
-              trans = await translateText(orig, sourceLang, targetLang);
-            }
-
-            const msgObj = {
-              msgId: msgId,
-              senderName: data.senderName,
-              senderRole: data.senderRole,
-              originalText: orig,
-              translatedText: trans,
-              imageData: data.imageData,
-              time: data.time,
-              isMine: false
-            };
-
-            renderMessage(msgObj);
-            saveMessageToHistory(msgObj);
-
-            if (!document.hidden) {
-              sendSeenReceipt(msgId);
-            } else {
-              pendingIncomingNotSeen.push(msgId);
-            }
-          })();
+        if (data.type === 'DELIVERED') {
+          markMessageAsDelivered(data.msgId);
         }
 
         if (data.type === 'SEEN') {
@@ -1399,6 +1343,124 @@
           updateStatus(false, I18N[myRole].statusDisconnected);
         }
       });
+    }
+
+    function resendMissingMessagesToPartner(partnerReceivedIds) {
+      const partnerSet = new Set(partnerReceivedIds);
+      outgoingMessagesMap.forEach((payload, msgId) => {
+        if (!partnerSet.has(msgId)) {
+          if (payload.imageData) {
+            sendChunkedImagePayload(payload);
+          } else {
+            broadcastData(payload);
+          }
+        }
+      });
+    }
+
+    async function processIncomingChatMessage(data, msgId) {
+      let orig = (data.originalText || '').trim();
+      let trans = (data.translatedText || '').trim();
+      const targetLang = myRole === 'vn' ? 'vi' : 'en';
+      const sourceLang = myRole === 'vn' ? 'en' : 'vi';
+
+      if (orig && (!trans || trans.toLowerCase() === orig.toLowerCase())) {
+        trans = await translateText(orig, sourceLang, targetLang);
+      }
+
+      const msgObj = {
+        msgId: msgId,
+        senderName: data.senderName,
+        senderRole: data.senderRole,
+        originalText: orig,
+        translatedText: trans,
+        imageData: data.imageData,
+        time: data.time,
+        isMine: false
+      };
+
+      renderMessage(msgObj);
+      saveMessageToHistory(msgObj);
+
+      if (!document.hidden) {
+        sendSeenReceipt(msgId);
+      } else {
+        pendingIncomingNotSeen.push(msgId);
+      }
+    }
+
+    // Send image in 16KB chunks so mobile Safari/Chrome WebRTC DataChannel never drops large photos
+    async function sendChunkedImagePayload(payload) {
+      const imgStr = payload.imageData || '';
+      const CHUNK_SIZE = 16000; // 16 KB safe for all mobile WebRTC implementations
+      const totalChunks = Math.ceil(imgStr.length / CHUNK_SIZE) || 1;
+      const ind = document.getElementById('typingIndicator');
+      const t = I18N[myRole];
+
+      for (let i = 0; i < totalChunks; i++) {
+        const piece = imgStr.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        broadcastData({
+          type: 'IMG_CHUNK',
+          msgId: payload.msgId,
+          chunkIndex: i,
+          totalChunks: totalChunks,
+          chunkData: piece,
+          meta: i === 0 ? {
+            senderName: payload.senderName,
+            senderRole: payload.senderRole,
+            originalText: payload.originalText,
+            translatedText: payload.translatedText,
+            time: payload.time
+          } : null
+        });
+        if (totalChunks > 1) {
+          ind.textContent = t.sendingImgText(Math.round(((i + 1) / totalChunks) * 100));
+          await new Promise(r => setTimeout(r, 25));
+        }
+      }
+      ind.textContent = '';
+    }
+
+    function handleIncomingImageChunk(data) {
+      const { msgId, chunkIndex, totalChunks, chunkData, meta } = data;
+      if (renderedMsgIds.has(msgId)) return;
+
+      if (!incomingImageChunks[msgId]) {
+        incomingImageChunks[msgId] = {
+          meta: null,
+          chunks: new Array(totalChunks),
+          receivedCount: 0,
+          totalChunks: totalChunks
+        };
+      }
+
+      const entry = incomingImageChunks[msgId];
+      if (meta) entry.meta = meta;
+      if (entry.chunks[chunkIndex] === undefined) {
+        entry.chunks[chunkIndex] = chunkData;
+        entry.receivedCount++;
+      }
+
+      const ind = document.getElementById('typingIndicator');
+      const pct = Math.round((entry.receivedCount / entry.totalChunks) * 100);
+      ind.textContent = I18N[myRole].receivingImgText(pct);
+
+      if (entry.receivedCount >= entry.totalChunks && entry.meta) {
+        ind.textContent = '';
+        const fullImage = entry.chunks.join('');
+        delete incomingImageChunks[msgId];
+
+        broadcastData({ type: 'DELIVERED', msgId: msgId });
+        processIncomingChatMessage({
+          msgId: msgId,
+          senderName: entry.meta.senderName,
+          senderRole: entry.meta.senderRole,
+          originalText: entry.meta.originalText,
+          translatedText: entry.meta.translatedText,
+          imageData: fullImage,
+          time: entry.meta.time
+        }, msgId);
+      }
     }
 
     function sendSeenReceipt(msgId) {
@@ -1415,6 +1477,14 @@
       while (pendingIncomingNotSeen.length > 0) {
         const id = pendingIncomingNotSeen.shift();
         sendSeenReceipt(id);
+      }
+    }
+
+    function markMessageAsDelivered(msgId) {
+      const t = I18N[myRole];
+      const statusEl = document.getElementById(`status-${msgId}`);
+      if (statusEl && !statusEl.classList.contains('seen')) {
+        statusEl.textContent = t.deliveredText;
       }
     }
 
@@ -1435,23 +1505,28 @@
 
     function saveMessageToHistory(msgObj) {
       try {
-        const key = 'cat_history_' + roomPin;
+        const key = 'cat_history_v2';
         const list = JSON.parse(localStorage.getItem(key) || '[]');
         if (!list.some(item => item.msgId === msgObj.msgId)) {
           list.push(msgObj);
-          if (list.length > 50) list.shift();
+          if (list.length > 40) list.shift();
           localStorage.setItem(key, JSON.stringify(list));
+        }
+        if (msgObj.isMine) {
+          outgoingMessagesMap.set(msgObj.msgId, msgObj);
         }
       } catch (e) {}
     }
 
     function restoreHistory() {
       try {
-        const key = 'cat_history_' + roomPin;
+        const key = 'cat_history_v2';
         const list = JSON.parse(localStorage.getItem(key) || '[]');
         list.forEach(async (m) => {
+          if (m.isMine) {
+            outgoingMessagesMap.set(m.msgId, m);
+          }
           if (!renderedMsgIds.has(m.msgId)) {
-            // Re-translate any past message that was stuck untranslated!
             if (m.originalText && (!m.translatedText || m.translatedText.toLowerCase() === m.originalText.toLowerCase())) {
               const targetLang = m.senderRole === 'vn' ? 'en' : 'vi';
               const sourceLang = m.senderRole === 'vn' ? 'vi' : 'en';
@@ -1473,10 +1548,8 @@
 
     async function translateText(text, fromLang, toLang) {
       if (!text || !text.trim()) return '';
-      // Strip pure emojis check: if there are no letters at all, return as-is
       if (!/\p{L}/u.test(text)) return text;
 
-      // Engine 1: Google Neural Machine Translation (GTX)
       try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
@@ -1489,11 +1562,8 @@
             }
           }
         }
-      } catch (err) {
-        console.warn('Engine 1 (GTX) blocked or failed, trying Engine 2...', err);
-      }
+      } catch (err) {}
 
-      // Engine 2: Google Clients5 Dictionary/Translation Endpoint
       try {
         const url2 = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${fromLang}&tl=${toLang}&q=${encodeURIComponent(text)}`;
         const res2 = await fetch(url2);
@@ -1504,11 +1574,8 @@
             return out2;
           }
         }
-      } catch (err2) {
-        console.warn('Engine 2 failed, trying Engine 3 (MyMemory)...', err2);
-      }
+      } catch (err2) {}
 
-      // Engine 3: MyMemory Translated.net CORS-friendly API (Never blocked by EU AdBlockers)
       try {
         const pair = `${fromLang}|${toLang}`;
         const url3 = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(pair)}`;
@@ -1519,37 +1586,42 @@
             return data3.responseData.translatedText;
           }
         }
-      } catch (err3) {
-        console.error('All translation engines failed:', err3);
-      }
+      } catch (err3) {}
 
       return text;
     }
 
-    function compressImageFile(file, maxWidth = 960, quality = 0.8) {
+    // Mobile-safe image compression (works with iOS/Android camera photos)
+    function compressImageFile(file, maxWidth = 720, quality = 0.72) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const img = new Image();
-          img.onload = () => {
-            let w = img.width;
-            let h = img.height;
-            if (w > maxWidth) {
-              h = Math.round((h * maxWidth) / w);
-              w = maxWidth;
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', quality));
-          };
-          img.onerror = reject;
-          img.src = ev.target.result;
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          let w = img.width || 720;
+          let h = img.height || 720;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          if (h > maxWidth) {
+            w = Math.round((w * maxWidth) / h);
+            h = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+        img.onerror = (e) => {
+          URL.revokeObjectURL(url);
+          reject(e);
+        };
+        img.src = url;
       });
     }
 
@@ -1584,7 +1656,7 @@
         const myMsg = { ...payload, isMine: true };
         renderMessage(myMsg);
         saveMessageToHistory(myMsg);
-        broadcastData(payload);
+        await sendChunkedImagePayload(payload);
       } catch (err) {
         console.error('Image upload error:', err);
       }
@@ -1635,7 +1707,9 @@
     }
 
     function renderMessage({ msgId, senderName, senderRole, originalText, translatedText, imageData, time, isMine }) {
+      if (msgId && renderedMsgIds.has(msgId)) return;
       if (msgId) renderedMsgIds.add(msgId);
+
       const t = I18N[myRole];
       const area = document.getElementById('messagesArea');
       const row = document.createElement('div');
@@ -1665,9 +1739,9 @@
       }
 
       if (originalText) {
-        const mainDisplay = isMine ? `${flag} ${originalText}` : `${targetFlag} ${translatedText}`;
+        const mainDisplay = isMine ? `${flag} ${originalText}` : `${targetFlag} ${translatedText || originalText}`;
         const subDisplay = isMine
-          ? t.translatedToPeer(targetFlag, translatedText)
+          ? t.translatedToPeer(targetFlag, translatedText || originalText)
           : t.originalFromPeer(flag, originalText);
 
         const primaryDiv = document.createElement('div');
@@ -1684,7 +1758,7 @@
         ttsBtn.className = 'tts-btn';
         ttsBtn.title = t.ttsTitle;
         ttsBtn.textContent = '🔊';
-        ttsBtn.onclick = () => speakUtterance(translatedText, targetLangCode);
+        ttsBtn.onclick = () => speakUtterance(translatedText || originalText, targetLangCode);
 
         secondaryDiv.appendChild(subSpan);
         secondaryDiv.appendChild(ttsBtn);
@@ -1705,7 +1779,9 @@
       }
 
       area.appendChild(row);
-      area.scrollTop = area.scrollHeight;
+      setTimeout(() => {
+        area.scrollTop = area.scrollHeight;
+      }, 30);
     }
 
     function speakUtterance(text, lang) {
@@ -1720,7 +1796,7 @@
     function copyInviteLink() {
       const partnerRole = myRole === 'vn' ? 'en' : 'vn';
       const baseUrl = window.location.origin + window.location.pathname + window.location.search;
-      const inviteUrl = `${baseUrl}#pin=${encodeURIComponent(roomPin)}&role=${partnerRole}`;
+      const inviteUrl = `${baseUrl}#role=${partnerRole}`;
 
       navigator.clipboard.writeText(inviteUrl).then(() => {
         showToast(I18N[myRole].toastCopied);
