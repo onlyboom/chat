@@ -1175,9 +1175,9 @@
         namePlaceholder: 'E.g. Magda',
         defaultName: 'Magda 🐱',
         lblPin: '🔒 Room Password (Required)',
-        pinPlaceholder: 'Enter secret room password...',
-        pinError: '❌ Wrong Room Password! Please enter the exact secret password.',
-        securityHtml: '<strong>Password Required Every Time:</strong> Having the link is NOT enough. You must manually enter the secret password to unlock.',
+        pinPlaceholder: 'Enter shared secret password...',
+        pinError: '❌ Please enter a Room Password (at least 4 characters) to unlock or create a private room!',
+        securityHtml: '<strong>Password-Isolated Private Rooms:</strong> Only people who enter the exact same password can meet in the same room. Different password = separate private room!',
         btnJoin: 'Unlock & Start Chat 🐾 →',
         roomTitle: '🐱 Private Translation Chat',
         statusInit: 'Connecting to room & syncing devices...',
@@ -1217,10 +1217,10 @@
         lblName: 'Tên hiển thị của bạn',
         namePlaceholder: 'Ví dụ: Huy',
         defaultName: 'Huy 🐱',
-        lblPin: '🔒 Mật khẩu vào phòng (Bắt buộc tự nhập)',
-        pinPlaceholder: 'Nhập mật khẩu phòng bí mật...',
-        pinError: '❌ Sai mật khẩu phòng! Bạn phải tự nhập đúng mật khẩu mới vào được.',
-        securityHtml: '<strong>Bắt buộc nhập mật khẩu mỗi lần mở:</strong> Có link cũng KHÔNG thể tự vào. Phải tự gõ đúng mật khẩu mới mở được phòng.',
+        lblPin: '🔒 Mật khẩu phòng (Bắt buộc tự nhập)',
+        pinPlaceholder: 'Nhập mật khẩu phòng (VD: agrafkens hoặc pass mới)...',
+        pinError: '❌ Vui lòng nhập Mật khẩu phòng (ít nhất 4 ký tự) để mở khóa hoặc tạo phòng mới!',
+        securityHtml: '<strong>Mỗi mật khẩu là 1 phòng riêng biệt:</strong> Chỉ 2 người nhập trùng mật khẩu mới gặp được nhau. Đổi mật khẩu khác sẽ tự tạo ra một phòng bí mật mới hoàn toàn!',
         btnJoin: 'Mở Khóa & Vào Phòng 🐾 →',
         roomTitle: '🐱 Phòng Chat Mèo Con',
         statusInit: 'Đang kết nối & đồng bộ tin nhắn PC / Điện thoại...',
@@ -1368,9 +1368,9 @@
       setTimeout(() => { pinInput.value = ''; }, 250);
       setTimeout(() => { pinInput.value = ''; }, 600);
 
-      // Force mobile browser to bypass stale HTML cache if URL doesn't have latest version query ?v=5
-      if (window.location.protocol.startsWith('http') && !window.location.search.includes('v=5')) {
-        const cleanUrl = window.location.origin + window.location.pathname + '?v=5' + window.location.hash;
+      // Force mobile browser to bypass stale HTML cache if URL doesn't have latest version query ?v=6
+      if (window.location.protocol.startsWith('http') && !window.location.search.includes('v=6')) {
+        const cleanUrl = window.location.origin + window.location.pathname + '?v=6' + window.location.hash;
         window.location.replace(cleanUrl);
         return;
       }
@@ -1433,8 +1433,8 @@
 
     async function verifyPasswordHash(inputPin) {
       if (!inputPin) return false;
-      const digest = await sha256Hex('cat-auth-2026-' + inputPin.trim().toLowerCase());
-      return digest === REQUIRED_PIN_SHA256;
+      // Any password with 4+ characters creates its own isolated encrypted SHA-256 room mesh!
+      return inputPin.trim().length >= 4;
     }
 
     async function joinPrivateRoom() {
@@ -1464,7 +1464,13 @@
       document.getElementById('chatScreen').style.display = 'flex';
       document.getElementById('welcomeBanner').textContent = t.welcomeBanner;
 
-      restoreHistory();
+      // Clear previous room's rendered DOM before loading the specific room's isolated history
+      renderedMsgIds.clear();
+      allMessagesMap.clear();
+      const area = document.getElementById('messagesArea');
+      Array.from(area.querySelectorAll('.msg-row')).forEach(el => el.remove());
+
+      await restoreHistory();
       await startMultiDeviceMesh();
     }
 
@@ -2042,10 +2048,15 @@
       document.getElementById('peerStatus').textContent = text;
     }
 
-    function saveMessageToHistory(msgObj) {
+    async function getRoomHistoryKey() {
+      const h = (await sha256Hex('room-hist-2026-' + roomPin)).substring(0, 16);
+      return 'cat_hist_' + h;
+    }
+
+    async function saveMessageToHistory(msgObj) {
       try {
         allMessagesMap.set(msgObj.msgId, msgObj);
-        const key = 'cat_history_v2';
+        const key = await getRoomHistoryKey();
         const list = JSON.parse(localStorage.getItem(key) || '[]');
         if (!list.some(item => item.msgId === msgObj.msgId)) {
           list.push(msgObj);
@@ -2055,11 +2066,11 @@
       } catch (e) {}
     }
 
-    function restoreHistory() {
+    async function restoreHistory() {
       try {
-        const key = 'cat_history_v2';
+        const key = await getRoomHistoryKey();
         const list = JSON.parse(localStorage.getItem(key) || '[]');
-        list.forEach(async (m) => {
+        for (const m of list) {
           m.isMine = (m.senderRole === myRole);
           allMessagesMap.set(m.msgId, m);
           if (!renderedMsgIds.has(m.msgId)) {
@@ -2070,7 +2081,7 @@
             }
             renderMessage(m);
           }
-        });
+        }
       } catch (e) {}
     }
 
